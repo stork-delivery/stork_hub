@@ -8,6 +8,8 @@ environment:
 
 dependencies:
   bloc: ^8.1.4
+  dart_stork_admin_client:
+    path: ../dart_stork_admin_client
   encrypt: ^5.0.3
   equatable: ^2.0.5
   flutter:

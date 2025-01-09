@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/app/app.dart';
+import 'package:stork_hub/environment/app_environment.dart';
 import 'package:stork_hub/home/home.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/login/login.dart';
 import 'package:stork_hub/repositories/api_key_repository.dart';
 
 class App extends StatelessWidget {
-  const App({super.key});
+  const App({
+    required this.environment,
+    super.key,
+  });
+
+  final AppEnvironment environment;
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +21,9 @@ class App extends StatelessWidget {
       providers: [
         RepositoryProvider(
           create: (_) => ApiKeyRepository(),
+        ),
+        RepositoryProvider.value(
+          value: environment,
         ),
       ],
       child: BlocProvider(

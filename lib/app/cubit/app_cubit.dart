@@ -26,4 +26,14 @@ class AppCubit extends Cubit<AppState> {
 
     setApiKey(apiKey);
   }
+
+  /// Attempts to unlock and set a previously saved API key
+  Future<bool> unlockWithPassword(String password) async {
+    final apiKey = await _apiKeyRepository.getApiKey(password: password);
+    if (apiKey != null) {
+      setApiKey(apiKey);
+      return true;
+    }
+    return false;
+  }
 }

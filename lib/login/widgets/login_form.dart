@@ -54,13 +54,14 @@ class _LoginFormState extends State<LoginForm> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final password = _passwordController.text;
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
 
                 if (!state.hasSavedKey) {
                   final apiKey = _apiKeyController.text;
                   if (apiKey.isEmpty || password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessenger.showSnackBar(
                       const SnackBar(
                         content: Text('Please fill in all fields'),
                       ),
@@ -68,13 +69,13 @@ class _LoginFormState extends State<LoginForm> {
                     return;
                   }
 
-                  context.read<AppCubit>().saveAndSetApiKey(
+                  await context.read<AppCubit>().saveAndSetApiKey(
                         apiKey: apiKey,
                         password: password,
                       );
                 } else {
                   if (password.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessenger.showSnackBar(
                       const SnackBar(
                         content: Text('Please enter your password'),
                       ),
@@ -82,7 +83,18 @@ class _LoginFormState extends State<LoginForm> {
                     return;
                   }
 
-                  // TODO(erickzanardo): Implement login with saved key
+                  final success = await context
+                      .read<AppCubit>()
+                      .unlockWithPassword(password);
+
+                  if (!success && mounted) {
+
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Invalid password'),
+                      ),
+                    );
+                  }
                 }
               },
               child: Text(state.hasSavedKey ? 'Unlock' : 'Login'),

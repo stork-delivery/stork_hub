@@ -118,6 +118,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.6"
+  dart_stork_admin_client:
+    dependency: "direct main"
+    description:
+      path: "../dart_stork_admin_client"
+      relative: true
+    source: path
+    version: "0.1.0+1"
   diff_match_patch:
     dependency: transitive
     description:
@@ -205,6 +212,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
+  http:
+    dependency: transitive
+    description:
+      name: http
+      sha256: b9c29a161230ee03d3ccf545097fccd9b87a5264228c5d348202e0f0c28f9010
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.2"
   http_multi_server:
     dependency: transitive
     description:
