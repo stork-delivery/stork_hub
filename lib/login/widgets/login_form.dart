@@ -88,7 +88,6 @@ class _LoginFormState extends State<LoginForm> {
                       .unlockWithPassword(password);
 
                   if (!success && mounted) {
-
                     scaffoldMessenger.showSnackBar(
                       const SnackBar(
                         content: Text('Invalid password'),

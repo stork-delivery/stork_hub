@@ -9,7 +9,10 @@ void main() {
   group('App', () {
     testWidgets('renders LoginPage', (tester) async {
       await tester.pumpApp(
-        const App(environment: AppEnvironment()),
+        const App(
+          environment: AppEnvironment(),
+          storageDirectory: 'test',
+        ),
       );
       expect(find.byType(LoginPage), findsOneWidget);
     });

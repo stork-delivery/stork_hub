@@ -1,5 +1,7 @@
+import 'package:equatable/equatable.dart';
+
 /// Represents a Stork application.
-class App {
+class App extends Equatable {
   /// Creates a new [App] instance.
   const App({
     required this.id,
@@ -11,4 +13,7 @@ class App {
 
   /// The name of the app.
   final String name;
+
+  @override
+  List<Object?> get props => [id, name];
 }

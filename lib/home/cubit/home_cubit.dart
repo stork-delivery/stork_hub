@@ -36,7 +36,7 @@ class HomeCubit extends Cubit<HomeState> {
     final currentApps = List<App>.from(state.apps);
     // Generate a new ID (in a real app, this would come from the backend)
     final newId = currentApps.isEmpty ? 1 : currentApps.last.id + 1;
-    
+
     currentApps.add(App(id: newId, name: name));
 
     emit(state.copyWith(apps: currentApps));

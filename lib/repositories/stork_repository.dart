@@ -14,11 +14,13 @@ class StorkRepository {
   /// Lists all available apps.
   Future<List<App>> listApps() async {
     final apps = await client.listApps();
-    return apps.map(
-      (app) => App(
-        id: app.id,
-        name: app.name,
-      ),
-    ).toList();
+    return apps
+        .map(
+          (app) => App(
+            id: app.id,
+            name: app.name,
+          ),
+        )
+        .toList();
   }
 }

@@ -10,17 +10,19 @@ import 'package:stork_hub/repositories/api_key_repository.dart';
 class App extends StatelessWidget {
   const App({
     required this.environment,
+    required this.storageDirectory,
     super.key,
   });
 
   final AppEnvironment environment;
+  final String storageDirectory;
 
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(
-          create: (_) => ApiKeyRepository(),
+          create: (_) => ApiKeyRepository(directory: storageDirectory),
         ),
         RepositoryProvider.value(
           value: environment,
