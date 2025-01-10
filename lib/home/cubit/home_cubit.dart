@@ -33,21 +33,51 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   Future<void> addApp(String name) async {
-    final currentApps = List<App>.from(state.apps);
-    // Generate a new ID (in a real app, this would come from the backend)
-    final newId = currentApps.isEmpty ? 1 : currentApps.last.id + 1;
+    emit(state.copyWith(status: HomeStatus.loading));
 
-    currentApps.add(App(id: newId, name: name));
+    try {
+      final app = await _storkRepository.createApp(name: name);
+      final currentApps = List<App>.from(state.apps)..add(app);
 
-    emit(state.copyWith(apps: currentApps));
+      emit(
+        state.copyWith(
+          status: HomeStatus.loaded,
+          apps: currentApps,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: HomeStatus.error,
+          error: e.toString(),
+        ),
+      );
+    }
   }
 
   Future<void> removeApp(App app) async {
-    final currentApps = List<App>.from(state.apps)
-      ..removeWhere(
-        (element) => element.id == app.id,
-      );
+    emit(state.copyWith(status: HomeStatus.loading));
 
-    emit(state.copyWith(apps: currentApps));
+    try {
+      await _storkRepository.removeApp(app.id);
+      final currentApps = List<App>.from(state.apps)
+        ..removeWhere(
+          (element) => element.id == app.id,
+        );
+
+      emit(
+        state.copyWith(
+          status: HomeStatus.loaded,
+          apps: currentApps,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: HomeStatus.error,
+          error: e.toString(),
+        ),
+      );
+    }
   }
 }
