@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/app/app.dart';
+import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/login/login.dart';
 
 class LoginForm extends StatefulWidget {
@@ -23,6 +24,8 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocBuilder<LoginCubit, LoginState>(
       builder: (context, state) {
         if (state.loading) {
@@ -37,9 +40,9 @@ class _LoginFormState extends State<LoginForm> {
             if (!state.hasSavedKey) ...[
               TextField(
                 controller: _apiKeyController,
-                decoration: const InputDecoration(
-                  labelText: 'API Key',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.loginApiKeyLabel,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -47,9 +50,9 @@ class _LoginFormState extends State<LoginForm> {
             TextField(
               controller: _passwordController,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.loginPasswordLabel,
+                border: const OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
@@ -62,8 +65,8 @@ class _LoginFormState extends State<LoginForm> {
                   final apiKey = _apiKeyController.text;
                   if (apiKey.isEmpty || password.isEmpty) {
                     scaffoldMessenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Please fill in all fields'),
+                      SnackBar(
+                        content: Text(l10n.loginFillAllFieldsMessage),
                       ),
                     );
                     return;
@@ -76,8 +79,8 @@ class _LoginFormState extends State<LoginForm> {
                 } else {
                   if (password.isEmpty) {
                     scaffoldMessenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter your password'),
+                      SnackBar(
+                        content: Text(l10n.loginEnterPasswordMessage),
                       ),
                     );
                     return;
@@ -89,14 +92,18 @@ class _LoginFormState extends State<LoginForm> {
 
                   if (!success && mounted) {
                     scaffoldMessenger.showSnackBar(
-                      const SnackBar(
-                        content: Text('Invalid password'),
+                      SnackBar(
+                        content: Text(l10n.loginInvalidPasswordMessage),
                       ),
                     );
                   }
                 }
               },
-              child: Text(state.hasSavedKey ? 'Unlock' : 'Login'),
+              child: Text(
+                state.hasSavedKey
+                    ? l10n.loginUnlockButton
+                    : l10n.loginLoginButton,
+              ),
             ),
             if (state.hasSavedKey) ...[
               const SizedBox(height: 8),
@@ -106,29 +113,26 @@ class _LoginFormState extends State<LoginForm> {
                     context: context,
                     builder: (alertContext) {
                       return AlertDialog(
-                        title: const Text('Reset API Key'),
-                        content: const Text(
-                          'Are you sure you want to reset your API key? '
-                          'You will need to enter it again.',
-                        ),
+                        title: Text(l10n.loginResetKeyDialogTitle),
+                        content: Text(l10n.loginResetKeyDialogContent),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(alertContext),
-                            child: const Text('Cancel'),
+                            child: Text(l10n.loginResetKeyDialogCancelButton),
                           ),
                           TextButton(
                             onPressed: () {
                               context.read<LoginCubit>().resetKey();
                               Navigator.pop(alertContext);
                             },
-                            child: const Text('Reset'),
+                            child: Text(l10n.loginResetKeyDialogResetButton),
                           ),
                         ],
                       );
                     },
                   );
                 },
-                child: const Text('Reset API Key'),
+                child: Text(l10n.loginResetKeyButton),
               ),
             ],
           ],

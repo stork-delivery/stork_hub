@@ -8,11 +8,24 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stork_hub/app/app.dart';
 import 'package:stork_hub/environment/app_environment.dart';
 import 'package:stork_hub/home/home.dart';
+import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/models/models.dart' as model;
 
 class MockAppCubit extends Mock implements AppCubit {}
 
 class MockHomeCubit extends Mock implements HomeCubit {}
+
+extension PumpApp on WidgetTester {
+  Future<void> pumpHomeView(Widget widget) {
+    return pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: widget,
+      ),
+    );
+  }
+}
 
 void main() {
   group('HomePage', () {
@@ -31,18 +44,20 @@ void main() {
 
     testWidgets('renders HomeView', (tester) async {
       await tester.pumpWidget(
-        MultiRepositoryProvider(
-          providers: [
-            RepositoryProvider.value(
-              value: const AppEnvironment(
-                storkUrl: 'http://test.url',
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: MultiRepositoryProvider(
+            providers: [
+              RepositoryProvider.value(
+                value: const AppEnvironment(
+                  storkUrl: 'http://test.url',
+                ),
               ),
-            ),
-          ],
-          child: BlocProvider.value(
-            value: appCubit,
-            child: const MaterialApp(
-              home: HomePage(),
+            ],
+            child: BlocProvider.value(
+              value: appCubit,
+              child: const HomePage(),
             ),
           ),
         ),
@@ -68,17 +83,15 @@ void main() {
     }
 
     Widget buildSubject() {
-      return MaterialApp(
-        home: BlocProvider.value(
-          value: homeCubit,
-          child: const HomeView(),
-        ),
+      return BlocProvider.value(
+        value: homeCubit,
+        child: const HomeView(),
       );
     }
 
     testWidgets('renders loading indicator when loading', (tester) async {
       mockHomeCubitState(const HomeState(status: HomeStatus.loading));
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpHomeView(buildSubject());
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
@@ -92,14 +105,17 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpHomeView(buildSubject());
 
-      expect(find.text('Error: $errorMessage'), findsOneWidget);
+      expect(
+        find.text('Error: $errorMessage'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('renders empty message when no apps', (tester) async {
       mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpHomeView(buildSubject());
 
       expect(find.text('No apps added yet'), findsOneWidget);
     });
@@ -114,7 +130,7 @@ void main() {
         HomeState(status: HomeStatus.loaded, apps: apps),
       );
 
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpHomeView(buildSubject());
 
       expect(find.text('App 1'), findsOneWidget);
       expect(find.text('App 2'), findsOneWidget);
@@ -129,7 +145,7 @@ void main() {
         const HomeState(status: HomeStatus.loaded, apps: [app]),
       );
 
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpHomeView(buildSubject());
 
       await tester.tap(find.byIcon(Icons.delete));
       verify(() => homeCubit.removeApp(app)).called(1);
@@ -137,7 +153,7 @@ void main() {
 
     testWidgets('tapping add button shows dialog', (tester) async {
       mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
-      await tester.pumpWidget(buildSubject());
+      await tester.pumpHomeView(buildSubject());
 
       await tester.tap(find.byType(FloatingActionButton));
       await tester.pumpAndSettle();
@@ -150,7 +166,7 @@ void main() {
         when(() => homeCubit.addApp(any())).thenAnswer((_) async {});
         mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
 
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpHomeView(buildSubject());
 
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
@@ -167,7 +183,7 @@ void main() {
         when(() => homeCubit.addApp(any())).thenAnswer((_) async {});
         mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
 
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpHomeView(buildSubject());
 
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();
@@ -182,7 +198,7 @@ void main() {
       testWidgets('closes dialog on cancel', (tester) async {
         mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
 
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpHomeView(buildSubject());
 
         await tester.tap(find.byType(FloatingActionButton));
         await tester.pumpAndSettle();

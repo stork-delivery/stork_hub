@@ -1,3 +1,85 @@
 {
-    "@@locale": "en"
+    "@@locale": "en",
+    "homeAppBarTitle": "Stork Hub",
+    "@homeAppBarTitle": {
+        "description": "Text shown in the AppBar of the Home page"
+    },
+    "homeErrorMessage": "Error: {error}",
+    "@homeErrorMessage": {
+        "description": "Message shown when an error occurs loading apps",
+        "placeholders": {
+            "error": {
+                "type": "String",
+                "example": "Failed to load"
+            }
+        }
+    },
+    "homeNoAppsMessage": "No apps added yet",
+    "@homeNoAppsMessage": {
+        "description": "Message shown when there are no apps"
+    },
+    "homeAddAppDialogTitle": "Add App",
+    "@homeAddAppDialogTitle": {
+        "description": "Title of the dialog to add a new app"
+    },
+    "homeAddAppDialogNameLabel": "App Name",
+    "@homeAddAppDialogNameLabel": {
+        "description": "Label for the app name field in add app dialog"
+    },
+    "homeAddAppDialogCancelButton": "Cancel",
+    "@homeAddAppDialogCancelButton": {
+        "description": "Text for cancel button in add app dialog"
+    },
+    "homeAddAppDialogAddButton": "Add",
+    "@homeAddAppDialogAddButton": {
+        "description": "Text for add button in add app dialog"
+    },
+    "loginApiKeyLabel": "API Key",
+    "@loginApiKeyLabel": {
+        "description": "Label for the API key field in login form"
+    },
+    "loginPasswordLabel": "Password",
+    "@loginPasswordLabel": {
+        "description": "Label for the password field in login form"
+    },
+    "loginFillAllFieldsMessage": "Please fill in all fields",
+    "@loginFillAllFieldsMessage": {
+        "description": "Message shown when not all fields are filled"
+    },
+    "loginEnterPasswordMessage": "Please enter your password",
+    "@loginEnterPasswordMessage": {
+        "description": "Message shown when password is empty"
+    },
+    "loginInvalidPasswordMessage": "Invalid password",
+    "@loginInvalidPasswordMessage": {
+        "description": "Message shown when password is invalid"
+    },
+    "loginUnlockButton": "Unlock",
+    "@loginUnlockButton": {
+        "description": "Text for unlock button when user has saved key"
+    },
+    "loginLoginButton": "Login",
+    "@loginLoginButton": {
+        "description": "Text for login button when user needs to save key"
+    },
+    "loginResetKeyButton": "Reset API Key",
+    "@loginResetKeyButton": {
+        "description": "Text for reset API key button"
+    },
+    "loginResetKeyDialogTitle": "Reset API Key",
+    "@loginResetKeyDialogTitle": {
+        "description": "Title for reset API key dialog"
+    },
+    "loginResetKeyDialogContent": "Are you sure you want to reset your API key? You will need to enter it again.",
+    "@loginResetKeyDialogContent": {
+        "description": "Content text for reset API key dialog"
+    },
+    "loginResetKeyDialogCancelButton": "Cancel",
+    "@loginResetKeyDialogCancelButton": {
+        "description": "Text for cancel button in reset API key dialog"
+    },
+    "loginResetKeyDialogResetButton": "Reset",
+    "@loginResetKeyDialogResetButton": {
+        "description": "Text for reset button in reset API key dialog"
+    }
 }

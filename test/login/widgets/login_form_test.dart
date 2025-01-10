@@ -6,11 +6,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stork_hub/app/app.dart';
+import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/login/login.dart';
 
 class MockAppCubit extends Mock implements AppCubit {}
 
 class MockLoginCubit extends Mock implements LoginCubit {}
+
+extension PumpApp on WidgetTester {
+  Future<void> pumpLoginForm(Widget widget) {
+    return pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(body: widget),
+      ),
+    );
+  }
+}
 
 void main() {
   group('LoginForm', () {
@@ -50,21 +63,14 @@ void main() {
         value: appCubit,
         child: BlocProvider.value(
           value: loginCubit,
-          child: MaterialApp(
-            home: Scaffold(
-              body: BlocProvider.value(
-                value: loginCubit,
-                child: const LoginForm(),
-              ),
-            ),
-          ),
+          child: const LoginForm(),
         ),
       );
     }
 
     group('initial state', () {
       testWidgets('shows API key field when no saved key', (tester) async {
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpLoginForm(buildSubject());
 
         expect(find.widgetWithText(TextField, 'API Key'), findsOneWidget);
         expect(find.widgetWithText(TextField, 'Password'), findsOneWidget);
@@ -74,7 +80,7 @@ void main() {
 
       testWidgets('hides API key field when has saved key', (tester) async {
         mockLoginCubitState(const LoginState(hasSavedKey: true));
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpLoginForm(buildSubject());
 
         expect(find.widgetWithText(TextField, 'API Key'), findsNothing);
         expect(find.widgetWithText(TextField, 'Password'), findsOneWidget);
@@ -86,7 +92,7 @@ void main() {
     group('when loading', () {
       testWidgets('shows loading indicator', (tester) async {
         mockLoginCubitState(const LoginState(loading: true));
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpLoginForm(buildSubject());
 
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
       });
@@ -96,15 +102,12 @@ void main() {
       testWidgets(
         'shows error when fields are empty with no saved key',
         (tester) async {
-          await tester.pumpWidget(buildSubject());
+          await tester.pumpLoginForm(buildSubject());
 
           await tester.tap(find.text('Login'));
           await tester.pumpAndSettle();
 
-          expect(
-            find.text('Please fill in all fields'),
-            findsOneWidget,
-          );
+          expect(find.text('Please fill in all fields'), findsOneWidget);
         },
       );
 
@@ -112,38 +115,54 @@ void main() {
         'shows error when password is empty with saved key',
         (tester) async {
           mockLoginCubitState(const LoginState(hasSavedKey: true));
-          await tester.pumpWidget(buildSubject());
+          await tester.pumpLoginForm(buildSubject());
 
           await tester.tap(find.text('Unlock'));
           await tester.pumpAndSettle();
 
-          expect(
-            find.text('Please enter your password'),
-            findsOneWidget,
-          );
+          expect(find.text('Please enter your password'), findsOneWidget);
         },
       );
 
       testWidgets(
-        'saves and sets API key when no saved key',
+        'shows error when password is invalid',
         (tester) async {
-          await tester.pumpWidget(buildSubject());
+          when(() => appCubit.unlockWithPassword(any()))
+              .thenAnswer((_) async => false);
+
+          mockLoginCubitState(const LoginState(hasSavedKey: true));
+          await tester.pumpLoginForm(buildSubject());
+
+          await tester.enterText(
+            find.widgetWithText(TextField, 'Password'),
+            'password',
+          );
+          await tester.tap(find.text('Unlock'));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Invalid password'), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'saves and sets API key when fields are filled',
+        (tester) async {
+          await tester.pumpLoginForm(buildSubject());
 
           await tester.enterText(
             find.widgetWithText(TextField, 'API Key'),
-            'test-key',
+            'api-key',
           );
           await tester.enterText(
             find.widgetWithText(TextField, 'Password'),
-            'test-password',
+            'password',
           );
-
           await tester.tap(find.text('Login'));
 
           verify(
             () => appCubit.saveAndSetApiKey(
-              apiKey: 'test-key',
-              password: 'test-password',
+              apiKey: 'api-key',
+              password: 'password',
             ),
           ).called(1);
         },
@@ -153,48 +172,23 @@ void main() {
         'unlocks with password when has saved key',
         (tester) async {
           mockLoginCubitState(const LoginState(hasSavedKey: true));
-          await tester.pumpWidget(buildSubject());
+          await tester.pumpLoginForm(buildSubject());
 
           await tester.enterText(
             find.widgetWithText(TextField, 'Password'),
-            'test-password',
+            'password',
           );
-
           await tester.tap(find.text('Unlock'));
 
-          verify(
-            () => appCubit.unlockWithPassword('test-password'),
-          ).called(1);
-        },
-      );
-
-      testWidgets(
-        'shows error on invalid password',
-        (tester) async {
-          when(() => appCubit.unlockWithPassword(any()))
-              .thenAnswer((_) async => false);
-
-          mockLoginCubitState(const LoginState(hasSavedKey: true));
-
-          await tester.pumpWidget(buildSubject());
-
-          await tester.enterText(
-            find.widgetWithText(TextField, 'Password'),
-            'wrong-password',
-          );
-
-          await tester.tap(find.text('Unlock'));
-          await tester.pumpAndSettle();
-
-          expect(find.text('Invalid password'), findsOneWidget);
+          verify(() => appCubit.unlockWithPassword('password')).called(1);
         },
       );
     });
 
-    group('reset button', () {
+    group('reset API key button', () {
       testWidgets('shows confirmation dialog', (tester) async {
         mockLoginCubitState(const LoginState(hasSavedKey: true));
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpLoginForm(buildSubject());
 
         await tester.tap(find.text('Reset API Key'));
         await tester.pumpAndSettle();
@@ -207,31 +201,29 @@ void main() {
           ),
           findsOneWidget,
         );
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Reset'), findsOneWidget);
       });
 
-      testWidgets('resets key on confirm', (tester) async {
+      testWidgets('resets key when confirmed', (tester) async {
         mockLoginCubitState(const LoginState(hasSavedKey: true));
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpLoginForm(buildSubject());
 
         await tester.tap(find.text('Reset API Key'));
         await tester.pumpAndSettle();
 
-        await tester.tap(find.text('Reset').last);
-        await tester.pumpAndSettle();
-
+        await tester.tap(find.text('Reset'));
         verify(() => loginCubit.resetKey()).called(1);
       });
 
-      testWidgets('does nothing on cancel', (tester) async {
+      testWidgets('does nothing when canceled', (tester) async {
         mockLoginCubitState(const LoginState(hasSavedKey: true));
-        await tester.pumpWidget(buildSubject());
+        await tester.pumpLoginForm(buildSubject());
 
         await tester.tap(find.text('Reset API Key'));
         await tester.pumpAndSettle();
 
         await tester.tap(find.text('Cancel'));
-        await tester.pumpAndSettle();
-
         verifyNever(() => loginCubit.resetKey());
       });
     });

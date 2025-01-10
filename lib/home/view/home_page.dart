@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/app/app.dart';
 import 'package:stork_hub/environment/app_environment.dart';
 import 'package:stork_hub/home/home.dart';
+import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
 
 class HomePage extends StatelessWidget {
@@ -36,9 +37,11 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stork Hub'),
+        title: Text(l10n.homeAppBarTitle),
       ),
       body: BlocBuilder<HomeCubit, HomeState>(
         builder: (context, state) {
@@ -50,13 +53,13 @@ class HomeView extends StatelessWidget {
 
           if (state.status == HomeStatus.error) {
             return Center(
-              child: Text('Error: ${state.error}'),
+              child: Text(l10n.homeErrorMessage(state.error ?? '')),
             );
           }
 
           if (state.apps.isEmpty) {
-            return const Center(
-              child: Text('No apps added yet'),
+            return Center(
+              child: Text(l10n.homeNoAppsMessage),
             );
           }
 
@@ -117,18 +120,20 @@ class _AddAppDialogState extends State<AddAppDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return AlertDialog(
-      title: const Text('Add App'),
+      title: Text(l10n.homeAddAppDialogTitle),
       content: TextField(
         controller: _nameController,
-        decoration: const InputDecoration(
-          labelText: 'App Name',
+        decoration: InputDecoration(
+          labelText: l10n.homeAddAppDialogNameLabel,
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.homeAddAppDialogCancelButton),
         ),
         TextButton(
           onPressed: () {
@@ -137,7 +142,7 @@ class _AddAppDialogState extends State<AddAppDialog> {
               Navigator.of(context).pop();
             }
           },
-          child: const Text('Add'),
+          child: Text(l10n.homeAddAppDialogAddButton),
         ),
       ],
     );
