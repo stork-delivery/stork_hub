@@ -103,5 +103,25 @@
     "loginResetKeyDialogResetButton": "Reset",
     "@loginResetKeyDialogResetButton": {
         "description": "Text for reset button in reset API key dialog"
+    },
+    "appTitle": "Stork Hub",
+    "@appTitle": {
+        "description": "Title shown in the AppBar of the App"
+    },
+    "appDetailsTitle": "App Details",
+    "@appDetailsTitle": {
+        "description": "Title shown in the AppBar of the App Details page"
+    },
+    "appDetailsNameLabel": "Name",
+    "@appDetailsNameLabel": {
+        "description": "Label for the name field in the App Details page"
+    },
+    "appDetailsPublicMetadataLabel": "Public Metadata",
+    "@appDetailsPublicMetadataLabel": {
+        "description": "Label for the public metadata field in the App Details page"
+    },
+    "homeEditAppTooltip": "Edit app",
+    "@homeEditAppTooltip": {
+        "description": "Tooltip for the edit app button"
     }
 }

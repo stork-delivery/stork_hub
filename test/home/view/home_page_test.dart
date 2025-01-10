@@ -6,22 +6,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stork_hub/app/app.dart';
+import 'package:stork_hub/app_details/app_details.dart';
 import 'package:stork_hub/environment/app_environment.dart';
 import 'package:stork_hub/home/home.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/models/models.dart' as model;
+import 'package:stork_hub/repositories/stork_repository.dart';
 
 class MockAppCubit extends Mock implements AppCubit {}
 
 class MockHomeCubit extends Mock implements HomeCubit {}
 
+class MockStorkRepository extends Mock implements StorkRepository {}
+
 extension PumpApp on WidgetTester {
   Future<void> pumpHomeView(Widget widget) {
+    final storkRepository = MockStorkRepository();
     return pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: widget,
+      RepositoryProvider<StorkRepository>.value(
+        value: storkRepository,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: widget,
+        ),
       ),
     );
   }
@@ -121,20 +129,39 @@ void main() {
     });
 
     testWidgets('renders list of apps', (tester) async {
-      final apps = [
-        const model.App(id: 1, name: 'App 1'),
-        const model.App(id: 2, name: 'App 2'),
-      ];
-
       mockHomeCubitState(
-        HomeState(status: HomeStatus.loaded, apps: apps),
+        const HomeState(
+          status: HomeStatus.loaded,
+          apps: [
+            model.App(id: 1, name: 'Test App'),
+          ],
+        ),
       );
 
       await tester.pumpHomeView(buildSubject());
 
-      expect(find.text('App 1'), findsOneWidget);
-      expect(find.text('App 2'), findsOneWidget);
-      expect(find.byIcon(Icons.delete), findsNWidgets(2));
+      expect(find.text('Test App'), findsOneWidget);
+      expect(find.byIcon(Icons.edit), findsOneWidget);
+      expect(find.byIcon(Icons.delete), findsOneWidget);
+    });
+
+    testWidgets('navigates to app details when edit button is tapped',
+        (tester) async {
+      mockHomeCubitState(
+        const HomeState(
+          status: HomeStatus.loaded,
+          apps: [
+            model.App(id: 1, name: 'Test App'),
+          ],
+        ),
+      );
+
+      await tester.pumpHomeView(buildSubject());
+
+      await tester.tap(find.byIcon(Icons.edit));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AppDetailsPage), findsOneWidget);
     });
 
     group('delete app', () {
