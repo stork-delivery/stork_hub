@@ -230,5 +230,85 @@ void main() {
         );
       });
     });
+
+    group('listAppVersions', () {
+      test('returns list of versions', () async {
+        const storkVersion = StorkAppVersion(
+          id: 1,
+          appId: 1,
+          version: '1.0.0',
+          changelog: 'Initial release',
+        );
+
+        when(() => client.listVersions(1))
+            .thenAnswer((_) async => [storkVersion]);
+
+        final versions = await repository.listAppVersions(1);
+
+        expect(
+          versions,
+          equals([
+            const Version(
+              id: 1,
+              appId: 1,
+              version: '1.0.0',
+              changelog: 'Initial release',
+            ),
+          ]),
+        );
+
+        verify(() => client.listVersions(1)).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to list versions');
+        when(() => client.listVersions(any())).thenThrow(exception);
+
+        expect(
+          () => repository.listAppVersions(1),
+          throwsA(exception),
+        );
+      });
+    });
+
+    group('getAppVersion', () {
+      test('returns version', () async {
+        const storkVersion = StorkAppVersion(
+          id: 1,
+          appId: 1,
+          version: '1.0.0',
+          changelog: 'Initial release',
+        );
+
+        when(() => client.getVersion(1, 1))
+            .thenAnswer((_) async => storkVersion);
+
+        final version = await repository.getAppVersion(1, 1);
+
+        expect(
+          version,
+          equals(
+            const Version(
+              id: 1,
+              appId: 1,
+              version: '1.0.0',
+              changelog: 'Initial release',
+            ),
+          ),
+        );
+
+        verify(() => client.getVersion(1, 1)).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to get version');
+        when(() => client.getVersion(any(), any())).thenThrow(exception);
+
+        expect(
+          () => repository.getAppVersion(1, 1),
+          throwsA(exception),
+        );
+      });
+    });
   });
 }

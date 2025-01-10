@@ -6,13 +6,13 @@ enum AppDetailsStatus {
   /// Initial status
   initial,
 
-  /// Loading status
+  /// Loading app details
   loading,
 
-  /// Loaded status
+  /// App details loaded successfully
   loaded,
 
-  /// Error status
+  /// Error loading app details
   error,
 }
 
@@ -24,7 +24,8 @@ class AppDetailsState extends Equatable {
   const AppDetailsState({
     this.status = AppDetailsStatus.initial,
     this.app,
-    this.error = '',
+    this.error,
+    this.versions = const [],
   });
 
   /// The status of the app details page
@@ -34,10 +35,13 @@ class AppDetailsState extends Equatable {
   final App? app;
 
   /// The error message if any
-  final String error;
+  final String? error;
+
+  /// The list of versions for this app
+  final List<Version> versions;
 
   @override
-  List<Object?> get props => [status, app, error];
+  List<Object?> get props => [status, app, error, versions];
 
   /// Creates a copy of this state with the given fields replaced with new
   /// values
@@ -45,11 +49,13 @@ class AppDetailsState extends Equatable {
     AppDetailsStatus? status,
     App? app,
     String? error,
+    List<Version>? versions,
   }) {
     return AppDetailsState(
       status: status ?? this.status,
       app: app ?? this.app,
       error: error ?? this.error,
+      versions: versions ?? this.versions,
     );
   }
 }
