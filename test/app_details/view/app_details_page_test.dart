@@ -98,6 +98,43 @@ void main() {
 
     testWidgets('renders app details when status is loaded', (tester) async {
       const app = App(id: 1, name: 'Test App', publicMetadata: true);
+      final version = Version(
+        id: 1,
+        appId: app.id,
+        version: '1.0.0',
+        changelog: 'Initial release',
+      );
+
+      when(() => cubit.state).thenReturn(
+        AppDetailsState(
+          status: AppDetailsStatus.loaded,
+          app: app,
+          versions: [version],
+        ),
+      );
+
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: cubit,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: AppDetailsView()),
+          ),
+        ),
+      );
+
+      expect(find.text('ID: 1'), findsOneWidget);
+      expect(find.text('Test App'), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
+      expect(find.text('Versions'), findsOneWidget);
+      expect(find.text(version.version), findsOneWidget);
+      expect(find.text(version.changelog), findsOneWidget);
+    });
+
+    testWidgets('renders no versions message when no versions available',
+        (tester) async {
+      const app = App(id: 1, name: 'Test App', publicMetadata: true);
       when(() => cubit.state).thenReturn(
         const AppDetailsState(
           status: AppDetailsStatus.loaded,
@@ -116,9 +153,7 @@ void main() {
         ),
       );
 
-      expect(find.text('ID: 1'), findsOneWidget);
-      expect(find.text('Test App'), findsOneWidget);
-      expect(find.byType(Switch), findsOneWidget);
+      expect(find.text('No versions available'), findsOneWidget);
     });
 
     testWidgets('calls updateApp when name is submitted', (tester) async {

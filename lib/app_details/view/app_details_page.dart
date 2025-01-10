@@ -67,7 +67,7 @@ class AppDetailsView extends StatelessWidget {
           }
 
           if (state.status == AppDetailsStatus.error) {
-            return Center(child: Text(state.error));
+            return Center(child: Text(state.error ?? ''));
           }
 
           if (state.app == null) {
@@ -107,6 +107,29 @@ class AppDetailsView extends StatelessWidget {
                       },
                     ),
                   ],
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  'Versions',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: state.versions.isEmpty
+                      ? const Center(
+                          child: Text('No versions available'),
+                        )
+                      : ListView.separated(
+                          itemCount: state.versions.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) {
+                            final version = state.versions[index];
+                            return ListTile(
+                              title: Text(version.version),
+                              subtitle: Text(version.changelog),
+                            );
+                          },
+                        ),
                 ),
               ],
             ),

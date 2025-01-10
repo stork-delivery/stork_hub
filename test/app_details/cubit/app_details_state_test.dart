@@ -24,7 +24,7 @@ void main() {
           app: app,
           error: 'error',
         ).props,
-        equals([AppDetailsStatus.loaded, app, 'error']),
+        equals([AppDetailsStatus.loaded, app, 'error', const <Version>[]]),
       );
     });
 

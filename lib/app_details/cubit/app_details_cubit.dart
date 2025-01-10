@@ -23,10 +23,12 @@ class AppDetailsCubit extends Cubit<AppDetailsState> {
 
     try {
       final app = await _storkRepository.getApp(_appId);
+      final versions = await _storkRepository.listAppVersions(_appId);
       emit(
         state.copyWith(
           status: AppDetailsStatus.loaded,
           app: app,
+          versions: versions,
         ),
       );
     } catch (e) {

@@ -18,6 +18,15 @@ void main() {
       publicMetadata: true,
     );
 
+    final version = Version(
+      id: 1,
+      appId: app.id,
+      version: '1.0.0',
+      changelog: 'Changelog',
+    );
+
+    final versions = [version];
+
     setUp(() {
       storkRepository = MockStorkRepository();
       cubit = AppDetailsCubit(
@@ -36,18 +45,22 @@ void main() {
         setUp: () {
           when(() => storkRepository.getApp(app.id))
               .thenAnswer((_) async => app);
+          when(() => storkRepository.listAppVersions(app.id))
+              .thenAnswer((_) async => versions);
         },
         build: () => cubit,
         act: (cubit) => cubit.loadApp(),
         expect: () => [
           const AppDetailsState(status: AppDetailsStatus.loading),
-          const AppDetailsState(
+          AppDetailsState(
             status: AppDetailsStatus.loaded,
             app: app,
+            versions: versions,
           ),
         ],
         verify: (_) {
           verify(() => storkRepository.getApp(app.id)).called(1);
+          verify(() => storkRepository.listAppVersions(app.id)).called(1);
         },
       );
 
@@ -66,6 +79,29 @@ void main() {
             error: 'Exception: Failed to load app',
           ),
         ],
+      );
+
+      blocTest<AppDetailsCubit, AppDetailsState>(
+        'emits error state when loading versions fails',
+        setUp: () {
+          when(() => storkRepository.getApp(app.id))
+              .thenAnswer((_) async => app);
+          when(() => storkRepository.listAppVersions(app.id))
+              .thenThrow(Exception('Failed to load versions'));
+        },
+        build: () => cubit,
+        act: (cubit) => cubit.loadApp(),
+        expect: () => [
+          const AppDetailsState(status: AppDetailsStatus.loading),
+          const AppDetailsState(
+            status: AppDetailsStatus.error,
+            error: 'Exception: Failed to load versions',
+          ),
+        ],
+        verify: (_) {
+          verify(() => storkRepository.getApp(app.id)).called(1);
+          verify(() => storkRepository.listAppVersions(app.id)).called(1);
+        },
       );
     });
 

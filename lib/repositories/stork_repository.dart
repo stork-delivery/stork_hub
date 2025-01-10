@@ -73,4 +73,30 @@ class StorkRepository {
       publicMetadata: app.publicMetadata,
     );
   }
+
+  /// Gets a list of versions for an app
+  Future<List<Version>> listAppVersions(int appId) async {
+    final versions = await client.listVersions(appId);
+    return versions
+        .map(
+          (version) => Version(
+            id: version.id,
+            appId: version.appId,
+            version: version.version,
+            changelog: version.changelog,
+          ),
+        )
+        .toList();
+  }
+
+  /// Gets a specific version of an app
+  Future<Version> getAppVersion(int appId, int versionId) async {
+    final version = await client.getVersion(appId, versionId);
+    return Version(
+      id: version.id,
+      appId: version.appId,
+      version: version.version,
+      changelog: version.changelog,
+    );
+  }
 }
