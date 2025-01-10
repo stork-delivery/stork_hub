@@ -70,26 +70,71 @@ void main() {
     });
 
     group('addApp', () {
+      const newApp = App(id: 1, name: 'New App');
+
       blocTest<HomeCubit, HomeState>(
-        'adds app to empty list with id 1',
-        build: () => cubit,
+        'emits loading and loaded states when successful',
+        build: () {
+          when(
+            () => storkRepository.createApp(name: 'New App'),
+          ).thenAnswer((_) async => newApp);
+          return cubit;
+        },
         act: (cubit) => cubit.addApp('New App'),
         expect: () => [
+          const HomeState(status: HomeStatus.loading),
           const HomeState(
-            apps: [App(id: 1, name: 'New App')],
+            status: HomeStatus.loaded,
+            apps: [newApp],
+          ),
+        ],
+        verify: (_) {
+          verify(
+            () => storkRepository.createApp(name: 'New App'),
+          ).called(1);
+        },
+      );
+
+      blocTest<HomeCubit, HomeState>(
+        'emits loading and error states when repository throws',
+        build: () {
+          when(
+            () => storkRepository.createApp(name: any(named: 'name')),
+          ).thenThrow(Exception('Failed to create app'));
+          return cubit;
+        },
+        act: (cubit) => cubit.addApp('New App'),
+        expect: () => [
+          const HomeState(status: HomeStatus.loading),
+          const HomeState(
+            status: HomeStatus.error,
+            error: 'Exception: Failed to create app',
           ),
         ],
       );
 
       blocTest<HomeCubit, HomeState>(
-        'adds app to existing list with incremented id',
+        'adds app to existing list',
         seed: () => const HomeState(
+          status: HomeStatus.loaded,
           apps: [App(id: 1, name: 'Existing App')],
         ),
-        build: () => cubit,
+        build: () {
+          when(
+            () => storkRepository.createApp(name: 'New App'),
+          ).thenAnswer(
+            (_) async => const App(id: 2, name: 'New App'),
+          );
+          return cubit;
+        },
         act: (cubit) => cubit.addApp('New App'),
         expect: () => [
           const HomeState(
+            status: HomeStatus.loading,
+            apps: [App(id: 1, name: 'Existing App')],
+          ),
+          const HomeState(
+            status: HomeStatus.loaded,
             apps: [
               App(id: 1, name: 'Existing App'),
               App(id: 2, name: 'New App'),
@@ -104,30 +149,55 @@ void main() {
       const app2 = App(id: 2, name: 'App 2');
 
       blocTest<HomeCubit, HomeState>(
-        'removes app from list',
+        'emits loading and loaded states when successful',
         seed: () => const HomeState(
+          status: HomeStatus.loaded,
           apps: [app1, app2],
         ),
-        build: () => cubit,
+        build: () {
+          when(() => storkRepository.removeApp(1)).thenAnswer((_) async {});
+          return cubit;
+        },
         act: (cubit) => cubit.removeApp(app1),
         expect: () => [
           const HomeState(
+            status: HomeStatus.loading,
+            apps: [app1, app2],
+          ),
+          const HomeState(
+            status: HomeStatus.loaded,
             apps: [app2],
           ),
         ],
+        verify: (_) {
+          verify(() => storkRepository.removeApp(1)).called(1);
+        },
       );
 
       blocTest<HomeCubit, HomeState>(
-        'does nothing when app not in list',
+        'emits loading and error states when repository throws',
         seed: () => const HomeState(
+          status: HomeStatus.loaded,
           apps: [app1],
         ),
-        build: () => cubit,
-        act: (cubit) => cubit.removeApp(app2),
-        verify: (bloc) {
-          expect(bloc.state, const HomeState(apps: [app1]));
+        build: () {
+          when(
+            () => storkRepository.removeApp(any()),
+          ).thenThrow(Exception('Failed to remove app'));
+          return cubit;
         },
-        expect: () => const <HomeState>[],
+        act: (cubit) => cubit.removeApp(app1),
+        expect: () => [
+          const HomeState(
+            status: HomeStatus.loading,
+            apps: [app1],
+          ),
+          const HomeState(
+            status: HomeStatus.error,
+            error: 'Exception: Failed to remove app',
+            apps: [app1],
+          ),
+        ],
       );
     });
   });

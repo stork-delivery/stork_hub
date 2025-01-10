@@ -19,8 +19,48 @@ class StorkRepository {
           (app) => App(
             id: app.id,
             name: app.name,
+            publicMetadata: app.publicMetadata,
           ),
         )
         .toList();
+  }
+
+  /// Creates a new app.
+  Future<App> createApp({
+    required String name,
+    bool publicMetadata = false,
+  }) async {
+    final app = await client.createApp(
+      name: name,
+      publicMetadata: publicMetadata,
+    );
+    return App(
+      id: app.id,
+      name: app.name,
+      publicMetadata: app.publicMetadata,
+    );
+  }
+
+  /// Removes an app.
+  Future<void> removeApp(int id) async {
+    await client.removeApp(id);
+  }
+
+  /// Updates an app.
+  Future<App> updateApp({
+    required int id,
+    String? name,
+    bool? publicMetadata,
+  }) async {
+    final app = await client.updateApp(
+      id: id,
+      name: name,
+      publicMetadata: publicMetadata,
+    );
+    return App(
+      id: app.id,
+      name: app.name,
+      publicMetadata: app.publicMetadata,
+    );
   }
 }

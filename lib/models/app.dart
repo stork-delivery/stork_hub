@@ -6,6 +6,7 @@ class App extends Equatable {
   const App({
     required this.id,
     required this.name,
+    this.publicMetadata = false,
   });
 
   /// The unique identifier of the app.
@@ -14,6 +15,9 @@ class App extends Equatable {
   /// The name of the app.
   final String name;
 
+  /// Whether this app has public metadata.
+  final bool publicMetadata;
+
   @override
-  List<Object?> get props => [id, name];
+  List<Object?> get props => [id, name, publicMetadata];
 }

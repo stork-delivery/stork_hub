@@ -19,8 +19,8 @@ void main() {
     group('listApps', () {
       test('returns list of apps', () async {
         const storkApps = [
-          StorkApp(id: 1, name: 'App 1'),
-          StorkApp(id: 2, name: 'App 2'),
+          StorkApp(id: 1, name: 'App 1', publicMetadata: true),
+          StorkApp(id: 2, name: 'App 2', publicMetadata: false),
         ];
 
         when(() => client.listApps()).thenAnswer((_) async => storkApps);
@@ -30,7 +30,7 @@ void main() {
         expect(
           apps,
           equals([
-            const App(id: 1, name: 'App 1'),
+            const App(id: 1, name: 'App 1', publicMetadata: true),
             const App(id: 2, name: 'App 2'),
           ]),
         );
@@ -57,6 +57,140 @@ void main() {
         );
 
         verify(() => client.listApps()).called(1);
+      });
+    });
+
+    group('createApp', () {
+      test('creates a new app', () async {
+        const storkApp = StorkApp(
+          id: 1,
+          name: 'Test App',
+          publicMetadata: true,
+        );
+
+        when(
+          () => client.createApp(
+            name: 'Test App',
+            publicMetadata: true,
+          ),
+        ).thenAnswer((_) async => storkApp);
+
+        final app = await repository.createApp(
+          name: 'Test App',
+          publicMetadata: true,
+        );
+
+        expect(
+          app,
+          equals(
+            const App(
+              id: 1,
+              name: 'Test App',
+              publicMetadata: true,
+            ),
+          ),
+        );
+
+        verify(
+          () => client.createApp(
+            name: 'Test App',
+            publicMetadata: true,
+          ),
+        ).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to create app');
+        when(
+          () => client.createApp(
+            name: any(named: 'name'),
+            publicMetadata: any(named: 'publicMetadata'),
+          ),
+        ).thenThrow(exception);
+
+        expect(
+          () => repository.createApp(name: 'Test App'),
+          throwsA(exception),
+        );
+      });
+    });
+
+    group('removeApp', () {
+      test('removes an app', () async {
+        when(() => client.removeApp(1)).thenAnswer((_) async {});
+
+        await repository.removeApp(1);
+
+        verify(() => client.removeApp(1)).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to remove app');
+        when(() => client.removeApp(any())).thenThrow(exception);
+
+        expect(
+          () => repository.removeApp(1),
+          throwsA(exception),
+        );
+      });
+    });
+
+    group('updateApp', () {
+      test('updates an app', () async {
+        const storkApp = StorkApp(
+          id: 1,
+          name: 'Updated App',
+          publicMetadata: true,
+        );
+
+        when(
+          () => client.updateApp(
+            id: 1,
+            name: 'Updated App',
+            publicMetadata: true,
+          ),
+        ).thenAnswer((_) async => storkApp);
+
+        final app = await repository.updateApp(
+          id: 1,
+          name: 'Updated App',
+          publicMetadata: true,
+        );
+
+        expect(
+          app,
+          equals(
+            const App(
+              id: 1,
+              name: 'Updated App',
+              publicMetadata: true,
+            ),
+          ),
+        );
+
+        verify(
+          () => client.updateApp(
+            id: 1,
+            name: 'Updated App',
+            publicMetadata: true,
+          ),
+        ).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to update app');
+        when(
+          () => client.updateApp(
+            id: any(named: 'id'),
+            name: any(named: 'name'),
+            publicMetadata: any(named: 'publicMetadata'),
+          ),
+        ).thenThrow(exception);
+
+        expect(
+          () => repository.updateApp(id: 1),
+          throwsA(exception),
+        );
       });
     });
   });
