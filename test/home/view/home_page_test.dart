@@ -137,18 +137,53 @@ void main() {
       expect(find.byIcon(Icons.delete), findsNWidgets(2));
     });
 
-    testWidgets('tapping delete button calls removeApp', (tester) async {
+    group('delete app', () {
       const app = model.App(id: 1, name: 'App 1');
-      when(() => homeCubit.removeApp(app)).thenAnswer((_) async {});
 
-      mockHomeCubitState(
-        const HomeState(status: HomeStatus.loaded, apps: [app]),
-      );
+      setUp(() {
+        when(() => homeCubit.removeApp(app)).thenAnswer((_) async {});
+        mockHomeCubitState(
+          const HomeState(status: HomeStatus.loaded, apps: [app]),
+        );
+      });
 
-      await tester.pumpHomeView(buildSubject());
+      testWidgets('shows confirmation dialog when delete button tapped',
+          (tester) async {
+        await tester.pumpHomeView(buildSubject());
 
-      await tester.tap(find.byIcon(Icons.delete));
-      verify(() => homeCubit.removeApp(app)).called(1);
+        await tester.tap(find.byIcon(Icons.delete));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Delete App'), findsOneWidget);
+        expect(find.text('Are you sure you want to delete App 1?'),
+            findsOneWidget,);
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.text('Delete'), findsOneWidget);
+      });
+
+      testWidgets('removes app when confirmed', (tester) async {
+        await tester.pumpHomeView(buildSubject());
+
+        await tester.tap(find.byIcon(Icons.delete));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Delete'));
+        await tester.pumpAndSettle();
+
+        verify(() => homeCubit.removeApp(app)).called(1);
+      });
+
+      testWidgets('does nothing when canceled', (tester) async {
+        await tester.pumpHomeView(buildSubject());
+
+        await tester.tap(find.byIcon(Icons.delete));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        verifyNever(() => homeCubit.removeApp(app));
+      });
     });
 
     testWidgets('tapping add button shows dialog', (tester) async {

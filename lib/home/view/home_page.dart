@@ -72,7 +72,29 @@ class HomeView extends StatelessWidget {
                 trailing: IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
-                    context.read<HomeCubit>().removeApp(app);
+                    showDialog<void>(
+                      context: context,
+                      builder: (dialogContext) {
+                        return AlertDialog(
+                          title: Text(l10n.homeDeleteAppDialogTitle),
+                          content:
+                              Text(l10n.homeDeleteAppDialogContent(app.name)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialogContext),
+                              child: Text(l10n.homeDeleteAppDialogCancelButton),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                context.read<HomeCubit>().removeApp(app);
+                                Navigator.pop(dialogContext);
+                              },
+                              child: Text(l10n.homeDeleteAppDialogDeleteButton),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
                 ),
               );

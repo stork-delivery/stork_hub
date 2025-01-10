@@ -34,6 +34,28 @@
     "@homeAddAppDialogAddButton": {
         "description": "Text for add button in add app dialog"
     },
+    "homeDeleteAppDialogTitle": "Delete App",
+    "@homeDeleteAppDialogTitle": {
+        "description": "Title for delete app confirmation dialog"
+    },
+    "homeDeleteAppDialogContent": "Are you sure you want to delete {appName}?",
+    "@homeDeleteAppDialogContent": {
+        "description": "Content text for delete app confirmation dialog",
+        "placeholders": {
+            "appName": {
+                "type": "String",
+                "example": "My App"
+            }
+        }
+    },
+    "homeDeleteAppDialogCancelButton": "Cancel",
+    "@homeDeleteAppDialogCancelButton": {
+        "description": "Text for cancel button in delete app dialog"
+    },
+    "homeDeleteAppDialogDeleteButton": "Delete",
+    "@homeDeleteAppDialogDeleteButton": {
+        "description": "Text for delete button in delete app dialog"
+    },
     "loginApiKeyLabel": "API Key",
     "@loginApiKeyLabel": {
         "description": "Label for the API key field in login form"
