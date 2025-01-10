@@ -121,9 +121,11 @@ packages:
   dart_stork_admin_client:
     dependency: "direct main"
     description:
-      path: "../dart_stork_admin_client"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: f1ff7ebe1d96490975f22cb68920ea7ac6f34b17
+      url: "https://github.com/stork-delivery/dart_stork_admin_client.git"
+    source: git
     version: "0.1.0+1"
   diff_match_patch:
     dependency: transitive
