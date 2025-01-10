@@ -94,12 +94,14 @@ class HomeView extends StatelessWidget {
                             return AlertDialog(
                               title: Text(l10n.homeDeleteAppDialogTitle),
                               content: Text(
-                                  l10n.homeDeleteAppDialogContent(app.name),),
+                                l10n.homeDeleteAppDialogContent(app.name),
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(dialogContext),
                                   child: Text(
-                                      l10n.homeDeleteAppDialogCancelButton,),
+                                    l10n.homeDeleteAppDialogCancelButton,
+                                  ),
                                 ),
                                 TextButton(
                                   onPressed: () {
@@ -107,7 +109,8 @@ class HomeView extends StatelessWidget {
                                     Navigator.pop(dialogContext);
                                   },
                                   child: Text(
-                                      l10n.homeDeleteAppDialogDeleteButton,),
+                                    l10n.homeDeleteAppDialogDeleteButton,
+                                  ),
                                 ),
                               ],
                             );

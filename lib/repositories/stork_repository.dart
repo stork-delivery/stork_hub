@@ -63,4 +63,14 @@ class StorkRepository {
       publicMetadata: app.publicMetadata,
     );
   }
+
+  /// Gets an app by its id
+  Future<App> getApp(int id) async {
+    final app = await client.getApp(id);
+    return App(
+      id: app.id,
+      name: app.name,
+      publicMetadata: app.publicMetadata,
+    );
+  }
 }

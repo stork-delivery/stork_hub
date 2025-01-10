@@ -22,8 +22,7 @@ class AppDetailsCubit extends Cubit<AppDetailsState> {
     emit(state.copyWith(status: AppDetailsStatus.loading));
 
     try {
-      final apps = await _storkRepository.listApps();
-      final app = apps.firstWhere((app) => app.id == _appId);
+      final app = await _storkRepository.getApp(_appId);
       emit(
         state.copyWith(
           status: AppDetailsStatus.loaded,

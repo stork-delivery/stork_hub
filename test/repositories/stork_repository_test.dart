@@ -193,5 +193,42 @@ void main() {
         );
       });
     });
+
+    group('getApp', () {
+      test('returns app', () async {
+        const storkApp = StorkApp(
+          id: 1,
+          name: 'Test App',
+          publicMetadata: true,
+        );
+
+        when(() => client.getApp(1)).thenAnswer((_) async => storkApp);
+
+        final app = await repository.getApp(1);
+
+        expect(
+          app,
+          equals(
+            const App(
+              id: 1,
+              name: 'Test App',
+              publicMetadata: true,
+            ),
+          ),
+        );
+
+        verify(() => client.getApp(1)).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to get app');
+        when(() => client.getApp(any())).thenThrow(exception);
+
+        expect(
+          () => repository.getApp(1),
+          throwsA(exception),
+        );
+      });
+    });
   });
 }
