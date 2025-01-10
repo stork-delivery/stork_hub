@@ -144,5 +144,54 @@ void main() {
 
       expect(find.byType(AddAppDialog), findsOneWidget);
     });
+
+    group('AddAppDialog', () {
+      testWidgets('adds app when name is not empty', (tester) async {
+        when(() => homeCubit.addApp(any())).thenAnswer((_) async {});
+        mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
+
+        await tester.pumpWidget(buildSubject());
+
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+
+        await tester.enterText(find.byType(TextField), 'New App');
+        await tester.tap(find.text('Add'));
+        await tester.pumpAndSettle();
+
+        verify(() => homeCubit.addApp('New App')).called(1);
+        expect(find.byType(AddAppDialog), findsNothing);
+      });
+
+      testWidgets('does nothing when name is empty', (tester) async {
+        when(() => homeCubit.addApp(any())).thenAnswer((_) async {});
+        mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
+
+        await tester.pumpWidget(buildSubject());
+
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Add'));
+        await tester.pumpAndSettle();
+
+        verifyNever(() => homeCubit.addApp(any()));
+        expect(find.byType(AddAppDialog), findsOneWidget);
+      });
+
+      testWidgets('closes dialog on cancel', (tester) async {
+        mockHomeCubitState(const HomeState(status: HomeStatus.loaded));
+
+        await tester.pumpWidget(buildSubject());
+
+        await tester.tap(find.byType(FloatingActionButton));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AddAppDialog), findsNothing);
+      });
+    });
   });
 }
