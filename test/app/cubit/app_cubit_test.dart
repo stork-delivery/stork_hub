@@ -29,7 +29,7 @@ void main() {
 
       test('can set API key to null', () {
         cubit.setApiKey(null);
-        expect(cubit.state, equals(const AppState(apiKey: null)));
+        expect(cubit.state, equals(const AppState()));
       });
     });
 
@@ -126,7 +126,7 @@ void main() {
           final result = await cubit.unlockWithPassword(password);
           expect(result, isFalse);
         },
-        expect: () => [], // No state changes
+        expect: () => const <AppState>[], // No state changes
         verify: (cubit) {
           verify(
             () => apiKeyRepository.getApiKey(password: password),
