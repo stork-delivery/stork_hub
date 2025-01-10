@@ -155,8 +155,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Delete App'), findsOneWidget);
-        expect(find.text('Are you sure you want to delete App 1?'),
-            findsOneWidget,);
+        expect(
+          find.text('Are you sure you want to delete App 1?'),
+          findsOneWidget,
+        );
         expect(find.text('Cancel'), findsOneWidget);
         expect(find.text('Delete'), findsOneWidget);
       });
