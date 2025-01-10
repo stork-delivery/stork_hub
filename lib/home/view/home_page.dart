@@ -2,6 +2,7 @@ import 'package:dart_stork_admin_client/dart_stork_admin_client.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/app/app.dart';
+import 'package:stork_hub/app_details/app_details.dart';
 import 'package:stork_hub/environment/app_environment.dart';
 import 'package:stork_hub/home/home.dart';
 import 'package:stork_hub/l10n/l10n.dart';
@@ -69,33 +70,52 @@ class HomeView extends StatelessWidget {
               final app = state.apps[index];
               return ListTile(
                 title: Text(app.name),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    showDialog<void>(
-                      context: context,
-                      builder: (dialogContext) {
-                        return AlertDialog(
-                          title: Text(l10n.homeDeleteAppDialogTitle),
-                          content:
-                              Text(l10n.homeDeleteAppDialogContent(app.name)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(dialogContext),
-                              child: Text(l10n.homeDeleteAppDialogCancelButton),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.read<HomeCubit>().removeApp(app);
-                                Navigator.pop(dialogContext);
-                              },
-                              child: Text(l10n.homeDeleteAppDialogDeleteButton),
-                            ),
-                          ],
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      tooltip: l10n.homeEditAppTooltip,
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          AppDetailsPage.route(
+                            appId: app.id,
+                            storkRepository: context.read<StorkRepository>(),
+                          ),
                         );
                       },
-                    );
-                  },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog<void>(
+                          context: context,
+                          builder: (dialogContext) {
+                            return AlertDialog(
+                              title: Text(l10n.homeDeleteAppDialogTitle),
+                              content: Text(
+                                  l10n.homeDeleteAppDialogContent(app.name),),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child: Text(
+                                      l10n.homeDeleteAppDialogCancelButton,),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    context.read<HomeCubit>().removeApp(app);
+                                    Navigator.pop(dialogContext);
+                                  },
+                                  child: Text(
+                                      l10n.homeDeleteAppDialogDeleteButton,),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
               );
             },
