@@ -44,6 +44,19 @@ class ArtifactsDialog extends StatelessWidget {
                 );
               }
 
+              if (state.status == ArtifactsStatus.downloading) {
+                return const Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Downloading...'),
+                    ],
+                  ),
+                );
+              }
+
               if (state.status == ArtifactsStatus.error) {
                 return Center(
                   child: Text(state.error ?? ''),
@@ -65,6 +78,13 @@ class ArtifactsDialog extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
+                  if (state.downloadedFile != null) ...[
+                    Text(
+                      'Artifact downloaded to: ${state.downloadedFile}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   Flexible(
                     child: ListView.separated(
                       shrinkWrap: true,
@@ -75,6 +95,16 @@ class ArtifactsDialog extends StatelessWidget {
                         return ListTile(
                           title: Text(artifact.name),
                           subtitle: Text('Platform: ${artifact.platform}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.download),
+                            onPressed: () {
+                              context.read<ArtifactsCubit>().downloadArtifact(
+                                    artifact.platform,
+                                    artifact.name,
+                                  );
+                            },
+                            tooltip: 'Download artifact',
+                          ),
                         );
                       },
                     ),

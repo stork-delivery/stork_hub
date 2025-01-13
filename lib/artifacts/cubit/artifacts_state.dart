@@ -8,6 +8,9 @@ enum ArtifactsStatus {
   /// Loading artifacts
   loading,
 
+  /// Downloading artifact
+  downloading,
+
   /// Artifacts loaded successfully
   loaded,
 
@@ -24,6 +27,7 @@ class ArtifactsState extends Equatable {
     this.status = ArtifactsStatus.initial,
     this.artifacts = const [],
     this.error,
+    this.downloadedFile,
   });
 
   /// The status of the artifacts loading
@@ -35,8 +39,11 @@ class ArtifactsState extends Equatable {
   /// The error message if any
   final String? error;
 
+  /// The downloaded file if any
+  final String? downloadedFile;
+
   @override
-  List<Object?> get props => [status, artifacts, error];
+  List<Object?> get props => [status, artifacts, error, downloadedFile];
 
   /// Creates a copy of this state with the given fields replaced with new
   /// values
@@ -44,11 +51,13 @@ class ArtifactsState extends Equatable {
     ArtifactsStatus? status,
     List<Artifact>? artifacts,
     String? error,
+    String? downloadedFile,
   }) {
     return ArtifactsState(
       status: status ?? this.status,
       artifacts: artifacts ?? this.artifacts,
       error: error ?? this.error,
+      downloadedFile: downloadedFile ?? this.downloadedFile,
     );
   }
 }
