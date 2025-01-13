@@ -90,7 +90,10 @@ void main() {
 
     testWidgets('loads artifacts when shown', (tester) async {
       final repository = MockStorkRepository();
-      when(() => repository.listAppVersionArtifacts(any(), any()));
+      when(() => repository.listAppVersionArtifacts(any(), any()))
+          .thenAnswer((invocation) async {
+        return [];
+      });
 
       await tester.pumpWidget(
         MaterialApp(
