@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:dart_stork_admin_client/dart_stork_admin_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -346,6 +348,48 @@ void main() {
 
         expect(
           () => repository.listAppVersionArtifacts(1, '1.0.0'),
+          throwsException,
+        );
+      });
+    });
+
+    group('downloadArtifact', () {
+      setUp(() {
+        Directory('test/tmp').createSync(recursive: true);
+      });
+
+      tearDown(() {
+        if (Directory('test/tmp').existsSync()) {
+          Directory('test/tmp').deleteSync(recursive: true);
+        }
+      });
+
+      test('saves artifact to file', () async {
+        final bytes = List.generate(10, (index) => index);
+        final file = File('test/tmp/artifact.zip');
+
+        when(
+          () => client.downloadArtifact(1, '1.0.0', 'linux'),
+        ).thenAnswer((_) async => bytes);
+
+        await repository.downloadArtifact(1, '1.0.0', 'linux', file);
+
+        expect(file.existsSync(), isTrue);
+        expect(await file.readAsBytes(), bytes);
+
+        // Cleanup
+        await file.delete();
+      });
+
+      test('throws an exception when the request fails', () {
+        final file = File('test/tmp/artifact.zip');
+
+        when(
+          () => client.downloadArtifact(1, '1.0.0', 'linux'),
+        ).thenThrow(Exception('Failed to download artifact'));
+
+        expect(
+          () => repository.downloadArtifact(1, '1.0.0', 'linux', file),
           throwsException,
         );
       });
