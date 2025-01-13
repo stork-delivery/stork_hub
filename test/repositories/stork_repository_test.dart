@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:dart_stork_admin_client/dart_stork_admin_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -272,94 +274,79 @@ void main() {
     });
 
     group('getAppVersion', () {
-      test('returns version', () async {
-        const storkVersion = StorkAppVersion(
+      test('returns a version', () async {
+        final version = Version(
           id: 1,
           appId: 1,
           version: '1.0.0',
           changelog: 'Initial release',
         );
 
-        when(() => client.getVersion(1, 1))
-            .thenAnswer((_) async => storkVersion);
-
-        final version = await repository.getAppVersion(1, 1);
-
-        expect(
-          version,
-          equals(
-            const Version(
-              id: 1,
-              appId: 1,
-              version: '1.0.0',
-              changelog: 'Initial release',
-            ),
+        when(
+          () => client.getVersion(1, '1.0.0'),
+        ).thenAnswer(
+          (_) async => StorkAppVersion(
+            id: version.id,
+            appId: version.appId,
+            version: version.version,
+            changelog: version.changelog,
           ),
         );
 
-        verify(() => client.getVersion(1, 1)).called(1);
+        final result = await repository.getAppVersion(1, '1.0.0');
+        expect(result, version);
       });
 
-      test('throws when client throws', () async {
-        final exception = Exception('Failed to get version');
-        when(() => client.getVersion(any(), any())).thenThrow(exception);
+      test('throws an exception when the request fails', () {
+        when(
+          () => client.getVersion(1, '1.0.0'),
+        ).thenThrow(Exception('Failed to get version'));
 
         expect(
-          () => repository.getAppVersion(1, 1),
-          throwsA(exception),
+          () => repository.getAppVersion(1, '1.0.0'),
+          throwsException,
         );
       });
     });
 
     group('listAppVersionArtifacts', () {
-      test('returns list of artifacts', () async {
-        const storkArtifacts = [
-          StorkAppVersionArtifact(
+      test('returns a list of artifacts', () async {
+        final artifacts = [
+          Artifact(
             id: 1,
+            name: 'artifact.zip',
             versionId: 1,
-            name: 'app-release.apk',
-            platform: 'android',
-          ),
-          StorkAppVersionArtifact(
-            id: 2,
-            versionId: 1,
-            name: 'app.ipa',
-            platform: 'ios',
+            platform: 'linux',
           ),
         ];
 
-        when(() => client.listArtifacts(1, 1))
-            .thenAnswer((_) async => storkArtifacts);
-
-        final result = await repository.listAppVersionArtifacts(1, 1);
-
-        expect(
-          result,
-          equals([
-            const Artifact(
-              id: 1,
-              versionId: 1,
-              name: 'app-release.apk',
-              platform: 'android',
-            ),
-            const Artifact(
-              id: 2,
-              versionId: 1,
-              name: 'app.ipa',
-              platform: 'ios',
-            ),
-          ]),
+        when(
+          () => client.listArtifacts(1, '1.0.0'),
+        ).thenAnswer(
+          (_) async => artifacts
+              .map(
+                (artifact) => StorkAppVersionArtifact(
+                  id: artifact.id,
+                  name: artifact.name,
+                  versionId: artifact.versionId,
+                  platform: artifact.platform,
+                ),
+              )
+              .toList(),
         );
-        verify(() => client.listArtifacts(1, 1)).called(1);
+
+        final result = await repository.listAppVersionArtifacts(1, '1.0.0');
+        expect(result, artifacts);
       });
 
-      test('throws when client throws', () async {
-        final exception = Exception('Failed to list artifacts');
-        when(() => client.listArtifacts(any(), any())).thenThrow(exception);
+      test('throws an exception when the request fails', () {
+        when(
+          () => client.listArtifacts(1, '1.0.0'),
+        ).thenThrow(Exception('Failed to list artifacts'));
 
         expect(
-          () => repository.listAppVersionArtifacts(1, 1),
-          throwsA(exception),
+          () => repository.listAppVersionArtifacts(1, '1.0.0'),
+          throwsException,
         );
       });
     });

@@ -147,7 +147,7 @@ class AppDetailsView extends StatelessWidget {
                                             ArtifactsDialog.showArtifactsDialog(
                                               context,
                                               appId: version.appId,
-                                              versionId: version.id,
+                                              versionName: version.version,
                                             );
                                           },
                                           tooltip: 'View artifacts',

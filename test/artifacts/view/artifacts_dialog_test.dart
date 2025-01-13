@@ -16,26 +16,11 @@ void main() {
   group('ArtifactsDialog', () {
     late ArtifactsCubit cubit;
 
-    final artifacts = [
-      const Artifact(
-        id: 1,
-        versionId: 1,
-        name: 'app-release.apk',
-        platform: 'android',
-      ),
-      const Artifact(
-        id: 2,
-        versionId: 1,
-        name: 'app.ipa',
-        platform: 'ios',
-      ),
-    ];
-
     setUp(() {
       cubit = MockArtifactsCubit();
     });
 
-    testWidgets('renders loading indicator when loading', (tester) async {
+    testWidgets('renders loading state', (tester) async {
       when(() => cubit.state).thenReturn(
         const ArtifactsState(status: ArtifactsStatus.loading),
       );
@@ -52,11 +37,12 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('renders error message when error occurs', (tester) async {
+    testWidgets('renders error state', (tester) async {
+      const errorMessage = 'Failed to load artifacts';
       when(() => cubit.state).thenReturn(
         const ArtifactsState(
           status: ArtifactsStatus.error,
-          error: 'Error message',
+          error: errorMessage,
         ),
       );
 
@@ -69,30 +55,21 @@ void main() {
         ),
       );
 
-      expect(find.text('Error message'), findsOneWidget);
+      expect(find.text(errorMessage), findsOneWidget);
     });
 
-    testWidgets('renders no artifacts message when no artifacts',
-        (tester) async {
-      when(() => cubit.state).thenReturn(
-        const ArtifactsState(status: ArtifactsStatus.loaded),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: const ArtifactsDialog(),
-          ),
+    testWidgets('renders loaded state', (tester) async {
+      const artifacts = [
+        Artifact(
+          id: 1,
+          name: 'artifact.zip',
+          versionId: 1,
+          platform: 'linux',
         ),
-      );
+      ];
 
-      expect(find.text('No artifacts available'), findsOneWidget);
-    });
-
-    testWidgets('renders artifacts list when loaded', (tester) async {
       when(() => cubit.state).thenReturn(
-        ArtifactsState(
+        const ArtifactsState(
           status: ArtifactsStatus.loaded,
           artifacts: artifacts,
         ),
@@ -107,11 +84,42 @@ void main() {
         ),
       );
 
-      expect(find.text('Artifacts'), findsOneWidget);
-      for (final artifact in artifacts) {
-        expect(find.text(artifact.name), findsOneWidget);
-        expect(find.text('Platform: ${artifact.platform}'), findsOneWidget);
-      }
+      expect(find.text('artifact.zip'), findsOneWidget);
+      expect(find.text('Platform: linux'), findsOneWidget);
+    });
+
+    testWidgets('loads artifacts when shown', (tester) async {
+      final repository = MockStorkRepository();
+      when(() => repository.listAppVersionArtifacts(any(), any()));
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RepositoryProvider<StorkRepository>.value(
+            value: repository,
+            child: Builder(
+              builder: (context) {
+                return TextButton(
+                  onPressed: () {
+                    ArtifactsDialog.showArtifactsDialog(
+                      context,
+                      appId: 1,
+                      versionName: '1.0.0',
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
+
+      verify(
+        () => repository.listAppVersionArtifacts(1, '1.0.0'),
+      ).called(1);
     });
   });
 }

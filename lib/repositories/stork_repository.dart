@@ -90,8 +90,8 @@ class StorkRepository {
   }
 
   /// Gets a specific version of an app
-  Future<Version> getAppVersion(int appId, int versionId) async {
-    final version = await client.getVersion(appId, versionId);
+  Future<Version> getAppVersion(int appId, String versionName) async {
+    final version = await client.getVersion(appId, versionName);
     return Version(
       id: version.id,
       appId: version.appId,
@@ -103,9 +103,9 @@ class StorkRepository {
   /// Gets a list of artifacts for a specific version of an app
   Future<List<Artifact>> listAppVersionArtifacts(
     int appId,
-    int versionId,
+    String versionName,
   ) async {
-    final artifacts = await client.listArtifacts(appId, versionId);
+    final artifacts = await client.listArtifacts(appId, versionName);
     return artifacts
         .map(
           (artifact) => Artifact(

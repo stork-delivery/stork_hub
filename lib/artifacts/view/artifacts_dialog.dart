@@ -14,7 +14,7 @@ class ArtifactsDialog extends StatelessWidget {
   static Future<void> showArtifactsDialog(
     BuildContext context, {
     required int appId,
-    required int versionId,
+    required String versionName,
   }) {
     return showDialog<void>(
       context: context,
@@ -22,7 +22,7 @@ class ArtifactsDialog extends StatelessWidget {
         create: (_) => ArtifactsCubit(
           storkRepository: context.read<StorkRepository>(),
           appId: appId,
-          versionId: versionId,
+          versionName: versionName,
         )..loadArtifacts(),
         child: const ArtifactsDialog(),
       ),
