@@ -7,7 +7,7 @@ environment:
   sdk: ^3.5.0
 
 dependencies:
-  bloc: ^8.1.4
+  bloc: ^9.0.0
   dart_stork_admin_client:
     git:
       url: https://github.com/stork-delivery/dart_stork_admin_client.git
@@ -17,7 +17,7 @@ dependencies:
   file_selector: ^1.0.2
   flutter:
     sdk: flutter
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.0.0
   flutter_localizations:
     sdk: flutter
   intl: ^0.19.0
@@ -25,7 +25,7 @@ dependencies:
   pointycastle: ^3.7.3
 
 dev_dependencies:
-  bloc_test: ^9.1.7
+  bloc_test: ^10.0.0
   flutter_test:
     sdk: flutter
   mocktail: ^1.0.4
