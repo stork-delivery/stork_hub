@@ -88,6 +88,45 @@ void main() {
       expect(find.text('Platform: linux'), findsOneWidget);
     });
 
+    testWidgets('renders loaded state with multiple artifacts', (tester) async {
+      const artifacts = [
+        Artifact(
+          id: 1,
+          name: 'artifact.zip',
+          versionId: 1,
+          platform: 'linux',
+        ),
+        Artifact(
+          id: 2,
+          name: 'artifact.apk',
+          versionId: 1,
+          platform: 'android',
+        ),
+      ];
+
+      when(() => cubit.state).thenReturn(
+        const ArtifactsState(
+          status: ArtifactsStatus.loaded,
+          artifacts: artifacts,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider.value(
+            value: cubit,
+            child: const ArtifactsDialog(),
+          ),
+        ),
+      );
+
+      expect(find.text('artifact.zip'), findsOneWidget);
+      expect(find.text('Platform: linux'), findsOneWidget);
+      expect(find.text('artifact.apk'), findsOneWidget);
+      expect(find.text('Platform: android'), findsOneWidget);
+      expect(find.byType(Divider), findsOneWidget);
+    });
+
     testWidgets('loads artifacts when shown', (tester) async {
       final repository = MockStorkRepository();
       when(() => repository.listAppVersionArtifacts(any(), any()))
