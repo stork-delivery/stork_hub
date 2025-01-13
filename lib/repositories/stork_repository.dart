@@ -99,4 +99,22 @@ class StorkRepository {
       changelog: version.changelog,
     );
   }
+
+  /// Gets a list of artifacts for a specific version of an app
+  Future<List<Artifact>> listAppVersionArtifacts(
+    int appId,
+    int versionId,
+  ) async {
+    final artifacts = await client.listArtifacts(appId, versionId);
+    return artifacts
+        .map(
+          (artifact) => Artifact(
+            id: artifact.id,
+            name: artifact.name,
+            versionId: artifact.versionId,
+            platform: artifact.platform,
+          ),
+        )
+        .toList();
+  }
 }
