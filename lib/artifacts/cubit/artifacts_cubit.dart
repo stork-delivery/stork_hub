@@ -13,15 +13,15 @@ class ArtifactsCubit extends Cubit<ArtifactsState> {
   ArtifactsCubit({
     required StorkRepository storkRepository,
     required int appId,
-    required int versionId,
+    required String versionName,
   })  : _storkRepository = storkRepository,
         _appId = appId,
-        _versionId = versionId,
+        _versionName = versionName,
         super(const ArtifactsState());
 
   final StorkRepository _storkRepository;
   final int _appId;
-  final int _versionId;
+  final String _versionName;
 
   /// Loads the artifacts for the version
   Future<void> loadArtifacts() async {
@@ -30,7 +30,7 @@ class ArtifactsCubit extends Cubit<ArtifactsState> {
     try {
       final artifacts = await _storkRepository.listAppVersionArtifacts(
         _appId,
-        _versionId,
+        _versionName,
       );
       emit(
         state.copyWith(

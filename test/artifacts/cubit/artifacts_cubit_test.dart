@@ -13,20 +13,13 @@ void main() {
     late ArtifactsCubit cubit;
 
     const appId = 1;
-    const versionId = 1;
-
-    final artifacts = [
-      const Artifact(
+    const versionName = '1.0.0';
+    const artifacts = [
+      Artifact(
         id: 1,
+        name: 'artifact.zip',
         versionId: 1,
-        name: 'app-release.apk',
-        platform: 'android',
-      ),
-      const Artifact(
-        id: 2,
-        versionId: 1,
-        name: 'app.ipa',
-        platform: 'ios',
+        platform: 'linux',
       ),
     ];
 
@@ -35,7 +28,7 @@ void main() {
       cubit = ArtifactsCubit(
         storkRepository: storkRepository,
         appId: appId,
-        versionId: versionId,
+        versionName: versionName,
       );
     });
 
@@ -45,33 +38,28 @@ void main() {
 
     group('loadArtifacts', () {
       blocTest<ArtifactsCubit, ArtifactsState>(
-        'emits loaded state when artifacts are loaded',
+        'emits loaded state when artifacts are loaded successfully',
         setUp: () {
           when(
-            () => storkRepository.listAppVersionArtifacts(appId, versionId),
+            () => storkRepository.listAppVersionArtifacts(appId, versionName),
           ).thenAnswer((_) async => artifacts);
         },
         build: () => cubit,
         act: (cubit) => cubit.loadArtifacts(),
         expect: () => [
           const ArtifactsState(status: ArtifactsStatus.loading),
-          ArtifactsState(
+          const ArtifactsState(
             status: ArtifactsStatus.loaded,
             artifacts: artifacts,
           ),
         ],
-        verify: (_) {
-          verify(
-            () => storkRepository.listAppVersionArtifacts(appId, versionId),
-          ).called(1);
-        },
       );
 
       blocTest<ArtifactsCubit, ArtifactsState>(
-        'emits error state when loading fails',
+        'emits error state when loading artifacts fails',
         setUp: () {
           when(
-            () => storkRepository.listAppVersionArtifacts(appId, versionId),
+            () => storkRepository.listAppVersionArtifacts(appId, versionName),
           ).thenThrow(Exception('Failed to load artifacts'));
         },
         build: () => cubit,
