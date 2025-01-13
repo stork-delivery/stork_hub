@@ -16,6 +16,13 @@ void main() {
   group('ArtifactsDialog', () {
     late ArtifactsCubit cubit;
 
+    const artifact = Artifact(
+      id: 1,
+      name: 'test.zip',
+      platform: 'linux',
+      versionId: 1,
+    );
+
     setUp(() {
       cubit = MockArtifactsCubit();
     });
@@ -58,21 +65,10 @@ void main() {
       expect(find.text(errorMessage), findsOneWidget);
     });
 
-    testWidgets('renders loaded state', (tester) async {
-      const artifacts = [
-        Artifact(
-          id: 1,
-          name: 'artifact.zip',
-          versionId: 1,
-          platform: 'linux',
-        ),
-      ];
-
+    testWidgets('renders no artifacts message when list is empty',
+        (tester) async {
       when(() => cubit.state).thenReturn(
-        const ArtifactsState(
-          status: ArtifactsStatus.loaded,
-          artifacts: artifacts,
-        ),
+        const ArtifactsState(status: ArtifactsStatus.loaded),
       );
 
       await tester.pumpWidget(
@@ -84,30 +80,14 @@ void main() {
         ),
       );
 
-      expect(find.text('artifact.zip'), findsOneWidget);
-      expect(find.text('Platform: linux'), findsOneWidget);
+      expect(find.text('No artifacts available'), findsOneWidget);
     });
 
-    testWidgets('renders loaded state with multiple artifacts', (tester) async {
-      const artifacts = [
-        Artifact(
-          id: 1,
-          name: 'artifact.zip',
-          versionId: 1,
-          platform: 'linux',
-        ),
-        Artifact(
-          id: 2,
-          name: 'artifact.apk',
-          versionId: 1,
-          platform: 'android',
-        ),
-      ];
-
+    testWidgets('renders artifacts list when loaded', (tester) async {
       when(() => cubit.state).thenReturn(
         const ArtifactsState(
           status: ArtifactsStatus.loaded,
-          artifacts: artifacts,
+          artifacts: [artifact],
         ),
       );
 
@@ -120,11 +100,82 @@ void main() {
         ),
       );
 
-      expect(find.text('artifact.zip'), findsOneWidget);
-      expect(find.text('Platform: linux'), findsOneWidget);
-      expect(find.text('artifact.apk'), findsOneWidget);
-      expect(find.text('Platform: android'), findsOneWidget);
-      expect(find.byType(Divider), findsOneWidget);
+      expect(find.text(artifact.name), findsOneWidget);
+      expect(find.text('Platform: ${artifact.platform}'), findsOneWidget);
+      expect(find.byIcon(Icons.download), findsOneWidget);
+    });
+
+    testWidgets('shows download path when file is downloaded', (tester) async {
+      const downloadPath = '/path/to/downloaded/file.zip';
+      when(() => cubit.state).thenReturn(
+        const ArtifactsState(
+          status: ArtifactsStatus.loaded,
+          artifacts: [artifact],
+          downloadedFile: downloadPath,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider.value(
+            value: cubit,
+            child: const ArtifactsDialog(),
+          ),
+        ),
+      );
+
+      expect(
+        find.text('Artifact downloaded to: $downloadPath'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+      'tapping download button calls downloadArtifact',
+      (tester) async {
+        when(() => cubit.state).thenReturn(
+          const ArtifactsState(
+            status: ArtifactsStatus.loaded,
+            artifacts: [artifact],
+          ),
+        );
+        when(() => cubit.downloadArtifact(any(), any()))
+            .thenAnswer((_) async {});
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: BlocProvider.value(
+              value: cubit,
+              child: const ArtifactsDialog(),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.download));
+        await tester.pump();
+
+        verify(
+          () => cubit.downloadArtifact(artifact.platform, artifact.name),
+        ).called(1);
+      },
+    );
+
+    testWidgets('shows loading indicator while downloading', (tester) async {
+      when(() => cubit.state).thenReturn(
+        const ArtifactsState(status: ArtifactsStatus.downloading),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider.value(
+            value: cubit,
+            child: const ArtifactsDialog(),
+          ),
+        ),
+      );
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Downloading...'), findsOneWidget);
     });
 
     testWidgets('loads artifacts when shown', (tester) async {
