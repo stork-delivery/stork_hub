@@ -214,5 +214,55 @@ void main() {
         () => repository.listAppVersionArtifacts(1, '1.0.0'),
       ).called(1);
     });
+
+    testWidgets('renders multiple artifacts when loaded', (tester) async {
+      const artifacts = [
+        Artifact(
+          id: 1,
+          name: 'linux-app.zip',
+          platform: 'linux',
+          versionId: 1,
+        ),
+        Artifact(
+          id: 2,
+          name: 'mac-app.zip',
+          platform: 'macos',
+          versionId: 1,
+        ),
+        Artifact(
+          id: 3,
+          name: 'windows-app.zip',
+          platform: 'windows',
+          versionId: 1,
+        ),
+      ];
+
+      when(() => cubit.state).thenReturn(
+        const ArtifactsState(
+          status: ArtifactsStatus.loaded,
+          artifacts: artifacts,
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: BlocProvider.value(
+            value: cubit,
+            child: const ArtifactsDialog(),
+          ),
+        ),
+      );
+
+      for (final artifact in artifacts) {
+        expect(find.text(artifact.name), findsOneWidget);
+        expect(find.text('Platform: ${artifact.platform}'), findsOneWidget);
+      }
+
+      // Should have dividers between items (artifacts.length - 1 dividers)
+      expect(find.byType(Divider), findsNWidgets(artifacts.length - 1));
+
+      // Should have a download button for each artifact
+      expect(find.byIcon(Icons.download), findsNWidgets(artifacts.length));
+    });
   });
 }
