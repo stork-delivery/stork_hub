@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dart_stork_admin_client/dart_stork_admin_client.dart';
 import 'package:stork_hub/models/models.dart';
 
@@ -116,5 +118,17 @@ class StorkRepository {
           ),
         )
         .toList();
+  }
+
+  /// Downloads an artifact for a specific version and platform and saves it to
+  /// the specified file
+  Future<void> downloadArtifact(
+    int appId,
+    String versionName,
+    String platform,
+    File file,
+  ) async {
+    final bytes = await client.downloadArtifact(appId, versionName, platform);
+    await file.writeAsBytes(bytes);
   }
 }
