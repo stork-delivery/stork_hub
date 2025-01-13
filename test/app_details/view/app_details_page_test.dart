@@ -156,6 +156,58 @@ void main() {
       expect(find.text('No versions available'), findsOneWidget);
     });
 
+    testWidgets('renders multiple versions when available', (tester) async {
+      const app = App(id: 1, name: 'Test App', publicMetadata: true);
+      final versions = [
+        Version(
+          id: 1,
+          appId: app.id,
+          version: '2.0.0',
+          changelog: 'Major update',
+        ),
+        Version(
+          id: 2,
+          appId: app.id,
+          version: '1.1.0',
+          changelog: 'Minor update',
+        ),
+        Version(
+          id: 3,
+          appId: app.id,
+          version: '1.0.0',
+          changelog: 'Initial release',
+        ),
+      ];
+
+      when(() => cubit.state).thenReturn(
+        AppDetailsState(
+          status: AppDetailsStatus.loaded,
+          app: app,
+          versions: versions,
+        ),
+      );
+
+      await tester.pumpWidget(
+        BlocProvider.value(
+          value: cubit,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: AppDetailsView()),
+          ),
+        ),
+      );
+
+      // Verify all versions are rendered
+      for (final version in versions) {
+        expect(find.text(version.version), findsOneWidget);
+        expect(find.text(version.changelog), findsOneWidget);
+      }
+
+      // Verify versions are separated by dividers
+      expect(find.byType(Divider), findsNWidgets(versions.length - 1));
+    });
+
     testWidgets('calls updateApp when name is submitted', (tester) async {
       const app = App(id: 1, name: 'Test App', publicMetadata: true);
       when(() => cubit.state).thenReturn(
