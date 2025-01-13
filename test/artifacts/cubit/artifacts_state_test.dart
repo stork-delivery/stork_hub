@@ -1,4 +1,5 @@
-// ignore_for_file: avoid_redundant_argument_values, inference_failure_on_collection_literal
+// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: inference_failure_on_collection_literal
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stork_hub/artifacts/artifacts.dart';
