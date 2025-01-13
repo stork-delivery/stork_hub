@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stork_hub/app_details/app_details.dart';
+import 'package:stork_hub/artifacts/artifacts.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/models/models.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
@@ -308,10 +309,19 @@ void main() {
 
     testWidgets('shows artifacts dialog when archive button is pressed',
         (tester) async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+
       final cubit = MockAppDetailsCubit();
       when(() => cubit.state).thenReturn(
         AppDetailsState(
           status: AppDetailsStatus.loaded,
+          app: const App(
+            id: 1,
+            name: 'Test App',
+          ),
           versions: const [
             Version(
               id: 1,
@@ -345,7 +355,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(Dialog), findsOneWidget);
-      expect(find.text('Artifacts'), findsOneWidget);
+      expect(find.byType(ArtifactsDialog), findsOneWidget);
     });
 
     testWidgets('archive button is disabled when no versions are available',
