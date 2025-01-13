@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, avoid_redundant_argument_values
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
@@ -51,9 +51,11 @@ void main() {
 
   group('AppDetailsView', () {
     late AppDetailsCubit cubit;
+    late StorkRepository storkRepository;
 
     setUp(() {
       cubit = MockAppDetailsCubit();
+      storkRepository = MockStorkRepository();
     });
 
     testWidgets('renders loading indicator when status is loading',
@@ -302,6 +304,75 @@ void main() {
       await tester.pump();
 
       verify(() => cubit.updateApp(publicMetadata: false)).called(1);
+    });
+
+    testWidgets('shows artifacts dialog when archive button is pressed',
+        (tester) async {
+      final cubit = MockAppDetailsCubit();
+      when(() => cubit.state).thenReturn(
+        AppDetailsState(
+          status: AppDetailsStatus.loaded,
+          versions: const [
+            Version(
+              id: 1,
+              appId: 1,
+              version: '1.0.0',
+              changelog: 'Initial release',
+            ),
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: RepositoryProvider<StorkRepository>.value(
+            value: storkRepository,
+            child: BlocProvider<AppDetailsCubit>.value(
+              value: cubit,
+              child: const AppDetailsView(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Version: 1.0.0'), findsOneWidget);
+      expect(find.byIcon(Icons.archive), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.archive));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.text('Artifacts'), findsOneWidget);
+    });
+
+    testWidgets('archive button is disabled when no versions are available',
+        (tester) async {
+      final cubit = MockAppDetailsCubit();
+      when(() => cubit.state).thenReturn(
+        const AppDetailsState(
+          status: AppDetailsStatus.loaded,
+          versions: <Version>[],
+        ),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: RepositoryProvider<StorkRepository>.value(
+            value: storkRepository,
+            child: BlocProvider<AppDetailsCubit>.value(
+              value: cubit,
+              child: const AppDetailsView(),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byIcon(Icons.archive), findsNothing);
     });
   });
 }
