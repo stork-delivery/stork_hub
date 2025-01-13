@@ -310,5 +310,58 @@ void main() {
         );
       });
     });
+
+    group('listAppVersionArtifacts', () {
+      test('returns list of artifacts', () async {
+        const storkArtifacts = [
+          StorkAppVersionArtifact(
+            id: 1,
+            versionId: 1,
+            name: 'app-release.apk',
+            platform: 'android',
+          ),
+          StorkAppVersionArtifact(
+            id: 2,
+            versionId: 1,
+            name: 'app.ipa',
+            platform: 'ios',
+          ),
+        ];
+
+        when(() => client.listArtifacts(1, 1))
+            .thenAnswer((_) async => storkArtifacts);
+
+        final result = await repository.listAppVersionArtifacts(1, 1);
+
+        expect(
+          result,
+          equals([
+            const Artifact(
+              id: 1,
+              versionId: 1,
+              name: 'app-release.apk',
+              platform: 'android',
+            ),
+            const Artifact(
+              id: 2,
+              versionId: 1,
+              name: 'app.ipa',
+              platform: 'ios',
+            ),
+          ]),
+        );
+        verify(() => client.listArtifacts(1, 1)).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to list artifacts');
+        when(() => client.listArtifacts(any(), any())).thenThrow(exception);
+
+        expect(
+          () => repository.listAppVersionArtifacts(1, 1),
+          throwsA(exception),
+        );
+      });
+    });
   });
 }
