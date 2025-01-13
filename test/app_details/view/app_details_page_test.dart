@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -128,7 +130,7 @@ void main() {
       expect(find.text('Test App'), findsOneWidget);
       expect(find.byType(Switch), findsOneWidget);
       expect(find.text('Versions'), findsOneWidget);
-      expect(find.text(version.version), findsOneWidget);
+      expect(find.text('Version: ${version.version}'), findsOneWidget);
       expect(find.text(version.changelog), findsOneWidget);
     });
 
@@ -157,55 +159,92 @@ void main() {
     });
 
     testWidgets('renders multiple versions when available', (tester) async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+
+      tester.view.physicalSize = const Size(1024, 2048);
+      tester.view.devicePixelRatio = 1.0;
+
       const app = App(id: 1, name: 'Test App', publicMetadata: true);
-      final versions = [
+      const versions = [
         Version(
           id: 1,
-          appId: app.id,
+          appId: 1,
           version: '2.0.0',
           changelog: 'Major update',
         ),
         Version(
           id: 2,
-          appId: app.id,
+          appId: 1,
           version: '1.1.0',
           changelog: 'Minor update',
         ),
         Version(
           id: 3,
-          appId: app.id,
+          appId: 1,
           version: '1.0.0',
           changelog: 'Initial release',
         ),
       ];
 
-      when(() => cubit.state).thenReturn(
-        AppDetailsState(
-          status: AppDetailsStatus.loaded,
-          app: app,
-          versions: versions,
-        ),
+      final state = AppDetailsState(
+        status: AppDetailsStatus.loaded,
+        app: app,
+        versions: versions,
+      );
+
+      when(() => cubit.state).thenReturn(state);
+      whenListen(
+        cubit,
+        Stream.value(state),
+        initialState: state,
       );
 
       await tester.pumpWidget(
         BlocProvider.value(
           value: cubit,
-          child: const MaterialApp(
+          child: MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(body: AppDetailsView()),
+            home: const Scaffold(
+              body: AppDetailsView(),
+            ),
           ),
         ),
       );
 
-      // Verify all versions are rendered
+      await tester.pumpAndSettle();
+
+      // Find ListView first
+      final listView = find.byType(ListView);
+      expect(listView, findsOneWidget);
+
+      // Test each version individually using descendant finder
       for (final version in versions) {
-        expect(find.text(version.version), findsOneWidget);
-        expect(find.text(version.changelog), findsOneWidget);
+        expect(
+          find.descendant(
+            of: listView,
+            matching: find.text('Version: ${version.version}'),
+          ),
+          findsOneWidget,
+          reason: 'Could not find version ${version.version}',
+        );
+        expect(
+          find.descendant(
+            of: listView,
+            matching: find.text(version.changelog),
+          ),
+          findsOneWidget,
+        );
       }
 
-      // Verify versions are separated by dividers
-      expect(find.byType(Divider), findsNWidgets(versions.length - 1));
+      // Verify changelog labels
+      expect(
+        find.descendant(
+          of: listView,
+          matching: find.text('Changelog:'),
+        ),
+        findsNWidgets(3),
+      );
     });
 
     testWidgets('calls updateApp when name is submitted', (tester) async {
