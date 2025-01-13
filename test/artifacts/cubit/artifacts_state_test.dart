@@ -20,8 +20,9 @@ void main() {
           status: ArtifactsStatus.initial,
           artifacts: [],
           error: null,
+          downloadedFile: null,
         ).props,
-        equals([ArtifactsStatus.initial, const [], null]),
+        equals([ArtifactsStatus.initial, const [], null, null]),
       );
     });
 
@@ -77,6 +78,22 @@ void main() {
           equals(
             const ArtifactsState(
               error: 'error',
+            ),
+          ),
+        );
+      });
+
+      test(
+          'returns object with updated downloadedFile when downloadedFile is '
+          'provided', () {
+        const downloadedFile = '/path/to/file.zip';
+        expect(
+          const ArtifactsState().copyWith(
+            downloadedFile: downloadedFile,
+          ),
+          equals(
+            const ArtifactsState(
+              downloadedFile: downloadedFile,
             ),
           ),
         );
