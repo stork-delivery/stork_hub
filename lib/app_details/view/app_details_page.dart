@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/app_details/app_details.dart';
+import 'package:stork_hub/artifacts/artifacts.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
 
@@ -41,7 +42,10 @@ class AppDetailsPage extends StatelessWidget {
         storkRepository: storkRepository,
         appId: appId,
       )..loadApp(),
-      child: const AppDetailsView(),
+      child: RepositoryProvider<StorkRepository>(
+        create: (context) => storkRepository,
+        child: const AppDetailsView(),
+      ),
     );
   }
 }
@@ -116,17 +120,54 @@ class AppDetailsView extends StatelessWidget {
                 const SizedBox(height: 16),
                 Expanded(
                   child: state.versions.isEmpty
-                      ? const Center(
-                          child: Text('No versions available'),
-                        )
-                      : ListView.separated(
+                      ? const Text('No versions available')
+                      : ListView.builder(
+                          shrinkWrap: true,
                           itemCount: state.versions.length,
-                          separatorBuilder: (context, index) => const Divider(),
                           itemBuilder: (context, index) {
                             final version = state.versions[index];
-                            return ListTile(
-                              title: Text(version.version),
-                              subtitle: Text(version.changelog),
+                            return Card(
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Version: ${version.version}',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        IconButton(
+                                          icon: const Icon(Icons.archive),
+                                          onPressed: () {
+                                            ArtifactsDialog.showArtifactsDialog(
+                                              context,
+                                              appId: version.appId,
+                                              versionId: version.id,
+                                            );
+                                          },
+                                          tooltip: 'View artifacts',
+                                        ),
+                                      ],
+                                    ),
+                                    if (version.changelog.isNotEmpty) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Changelog:',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(version.changelog),
+                                    ],
+                                  ],
+                                ),
+                              ),
                             );
                           },
                         ),
