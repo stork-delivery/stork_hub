@@ -42,8 +42,8 @@ class AppDetailsPage extends StatelessWidget {
         storkRepository: storkRepository,
         appId: appId,
       )..loadApp(),
-      child: RepositoryProvider<StorkRepository>(
-        create: (context) => storkRepository,
+      child: RepositoryProvider<StorkRepository>.value(
+        value: storkRepository,
         child: const AppDetailsView(),
       ),
     );
