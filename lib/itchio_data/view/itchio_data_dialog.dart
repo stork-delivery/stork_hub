@@ -97,7 +97,8 @@ class _ItchIODataDialogState extends State<ItchIODataDialog> {
                       Text(
                         state.error!,
                         style: TextStyle(
-                            color: Theme.of(context).colorScheme.error),
+                          color: Theme.of(context).colorScheme.error,
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],

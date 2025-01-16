@@ -41,7 +41,8 @@ class ItchIODataState extends Equatable {
   @override
   List<Object?> get props => [status, data, error];
 
-  /// Creates a copy of this state with the given fields replaced with new values
+  /// Creates a copy of this state with the given fields replaced with new
+  /// values
   ItchIODataState copyWith({
     ItchIODataStatus? status,
     ItchIOData? data,
