@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/app_details/app_details.dart';
 import 'package:stork_hub/artifacts/artifacts.dart';
+import 'package:stork_hub/itchio_data/itchio_data.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
 
@@ -113,9 +114,24 @@ class AppDetailsView extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 32),
-                Text(
-                  'Versions',
-                  style: Theme.of(context).textTheme.titleLarge,
+                Row(
+                  children: [
+                    Text(
+                      'Versions',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.gamepad),
+                      onPressed: () {
+                        ItchIODataDialog.showItchIODataDialog(
+                          context,
+                          appId: state.app!.id,
+                        );
+                      },
+                      tooltip: 'ItchIO Data',
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 Expanded(
