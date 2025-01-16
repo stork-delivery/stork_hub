@@ -131,4 +131,42 @@ class StorkRepository {
     final bytes = await client.downloadArtifact(appId, versionName, platform);
     await file.writeAsBytes(bytes);
   }
+
+  /// Gets the Itch.io integration data for an app
+  Future<ItchIOData?> getAppItchIOData(int appId) async {
+    final data = await client.getItchIOData(appId);
+    if (data == null) {
+      return null;
+    }
+    return ItchIOData(
+      id: data.id,
+      appId: data.appId,
+      buttlerKey: data.buttlerKey,
+      itchIOUsername: data.itchIOUsername,
+      itchIOGameName: data.itchIOGameName,
+    );
+  }
+
+  /// Updates the Itch.io integration data for an app
+  Future<ItchIOData> updateAppItchIOData({
+    required int appId,
+    required String buttlerKey,
+    required String itchIOUsername,
+    required String itchIOGameName,
+  }) async {
+    final data = await client.updateItchIOData(
+      appId: appId,
+      buttlerKey: buttlerKey,
+      itchIOUsername: itchIOUsername,
+      itchIOGameName: itchIOGameName,
+    );
+
+    return ItchIOData(
+      id: data.id,
+      appId: data.appId,
+      buttlerKey: data.buttlerKey,
+      itchIOUsername: data.itchIOUsername,
+      itchIOGameName: data.itchIOGameName,
+    );
+  }
 }

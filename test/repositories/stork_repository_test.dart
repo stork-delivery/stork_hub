@@ -237,11 +237,12 @@ void main() {
 
     group('listAppVersions', () {
       test('returns list of versions', () async {
-        const storkVersion = StorkAppVersion(
+        final storkVersion = StorkAppVersion(
           id: 1,
           appId: 1,
           version: '1.0.0',
           changelog: 'Initial release',
+          createdAt: DateTime.now(),
         );
 
         when(() => client.listVersions(1))
@@ -292,6 +293,7 @@ void main() {
             appId: version.appId,
             version: version.version,
             changelog: version.changelog,
+            createdAt: DateTime.now(),
           ),
         );
 
@@ -391,6 +393,129 @@ void main() {
         expect(
           () => repository.downloadArtifact(1, '1.0.0', 'linux', file),
           throwsException,
+        );
+      });
+    });
+
+    group('getAppItchIOData', () {
+      test('returns ItchIOData when data exists', () async {
+        const storkItchIOData = StorkItchIOData(
+          id: 1,
+          appId: 2,
+          buttlerKey: 'buttlerKey',
+          itchIOUsername: 'username',
+          itchIOGameName: 'gameName',
+        );
+
+        when(() => client.getItchIOData(2))
+            .thenAnswer((_) async => storkItchIOData);
+
+        final data = await repository.getAppItchIOData(2);
+
+        expect(
+          data,
+          equals(
+            const ItchIOData(
+              id: 1,
+              appId: 2,
+              buttlerKey: 'buttlerKey',
+              itchIOUsername: 'username',
+              itchIOGameName: 'gameName',
+            ),
+          ),
+        );
+
+        verify(() => client.getItchIOData(2)).called(1);
+      });
+
+      test('returns null when no data exists', () async {
+        when(() => client.getItchIOData(2)).thenAnswer((_) async => null);
+
+        final data = await repository.getAppItchIOData(2);
+
+        expect(data, isNull);
+        verify(() => client.getItchIOData(2)).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to get ItchIO data');
+        when(() => client.getItchIOData(any())).thenThrow(exception);
+
+        expect(
+          () => repository.getAppItchIOData(2),
+          throwsA(exception),
+        );
+      });
+    });
+
+    group('updateAppItchIOData', () {
+      test('updates ItchIO data', () async {
+        const storkItchIOData = StorkItchIOData(
+          id: 1,
+          appId: 2,
+          buttlerKey: 'buttlerKey',
+          itchIOUsername: 'username',
+          itchIOGameName: 'gameName',
+        );
+
+        when(
+          () => client.updateItchIOData(
+            appId: 2,
+            buttlerKey: 'buttlerKey',
+            itchIOUsername: 'username',
+            itchIOGameName: 'gameName',
+          ),
+        ).thenAnswer((_) async => storkItchIOData);
+
+        final data = await repository.updateAppItchIOData(
+          appId: 2,
+          buttlerKey: 'buttlerKey',
+          itchIOUsername: 'username',
+          itchIOGameName: 'gameName',
+        );
+
+        expect(
+          data,
+          equals(
+            const ItchIOData(
+              id: 1,
+              appId: 2,
+              buttlerKey: 'buttlerKey',
+              itchIOUsername: 'username',
+              itchIOGameName: 'gameName',
+            ),
+          ),
+        );
+
+        verify(
+          () => client.updateItchIOData(
+            appId: 2,
+            buttlerKey: 'buttlerKey',
+            itchIOUsername: 'username',
+            itchIOGameName: 'gameName',
+          ),
+        ).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to update ItchIO data');
+        when(
+          () => client.updateItchIOData(
+            appId: any(named: 'appId'),
+            buttlerKey: any(named: 'buttlerKey'),
+            itchIOUsername: any(named: 'itchIOUsername'),
+            itchIOGameName: any(named: 'itchIOGameName'),
+          ),
+        ).thenThrow(exception);
+
+        expect(
+          () => repository.updateAppItchIOData(
+            appId: 2,
+            buttlerKey: 'buttlerKey',
+            itchIOUsername: 'username',
+            itchIOGameName: 'gameName',
+          ),
+          throwsA(exception),
         );
       });
     });

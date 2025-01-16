@@ -69,16 +69,5 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(TextField), findsWidgets);
     });
-
-    testWidgets('shows correct title', (tester) async {
-      await tester.pumpApp(
-        RepositoryProvider.value(
-          value: apiKeyRepository,
-          child: const LoginPage(),
-        ),
-      );
-
-      expect(find.text('Login'), findsOneWidget);
-    });
   });
 }

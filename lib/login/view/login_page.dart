@@ -13,12 +13,23 @@ class LoginPage extends StatelessWidget {
         apiKeyRepository: context.read<ApiKeyRepository>(),
       )..load(),
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Login'),
-        ),
-        body: const Padding(
-          padding: EdgeInsets.all(16),
-          child: LoginForm(),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/logo.png',
+                  width: 200,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  filterQuality: FilterQuality.none,
+                ),
+                const LoginForm(),
+              ],
+            ),
+          ),
         ),
       ),
     );
