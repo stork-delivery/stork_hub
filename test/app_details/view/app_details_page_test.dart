@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stork_hub/app_details/app_details.dart';
 import 'package:stork_hub/artifacts/artifacts.dart';
+import 'package:stork_hub/itchio_data/itchio_data.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/models/models.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
@@ -384,5 +385,41 @@ void main() {
 
       expect(find.byIcon(Icons.archive), findsNothing);
     });
+
+    testWidgets(
+      'opens ItchIO data dialog when button is pressed',
+      (tester) async {
+        when(() => cubit.state).thenReturn(
+          AppDetailsState(
+            status: AppDetailsStatus.loaded,
+            app: App(
+              id: 1,
+              name: 'Test App',
+              publicMetadata: false,
+            ),
+            versions: const [],
+          ),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: RepositoryProvider.value(
+              value: storkRepository,
+              child: BlocProvider.value(
+                value: cubit,
+                child: AppDetailsView(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.gamepad));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ItchIODataDialog), findsOneWidget);
+      },
+    );
   });
 }

@@ -9,6 +9,7 @@ import 'package:stork_hub/app/app.dart';
 import 'package:stork_hub/app_details/app_details.dart';
 import 'package:stork_hub/environment/app_environment.dart';
 import 'package:stork_hub/home/home.dart';
+import 'package:stork_hub/itchio_data/itchio_data.dart';
 import 'package:stork_hub/l10n/l10n.dart';
 import 'package:stork_hub/models/models.dart' as model;
 import 'package:stork_hub/repositories/stork_repository.dart';
@@ -273,5 +274,46 @@ void main() {
         expect(find.byType(AddAppDialog), findsNothing);
       });
     });
+
+    testWidgets(
+      'opens ItchIO data dialog when button is pressed',
+      (tester) async {
+        const state = HomeState(
+          status: HomeStatus.loaded,
+          apps: [
+            model.App(
+              id: 1,
+              name: 'Test App',
+              publicMetadata: false,
+            ),
+          ],
+        );
+
+        whenListen(
+          homeCubit,
+          Stream.value(state),
+          initialState: state,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: RepositoryProvider<StorkRepository>.value(
+              value: MockStorkRepository(),
+              child: BlocProvider.value(
+                value: homeCubit,
+                child: const HomeView(),
+              ),
+            ),
+          ),
+        );
+
+        await tester.tap(find.byIcon(Icons.games));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ItchIODataDialog), findsOneWidget);
+      },
+    );
   });
 }
