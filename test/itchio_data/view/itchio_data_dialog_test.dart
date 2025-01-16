@@ -212,5 +212,77 @@ void main() {
 
       expect(find.byType(ItchIODataDialog), findsNothing);
     });
+
+    testWidgets('showItchIODataDialog creates dialog with cubit',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RepositoryProvider.value(
+            value: storkRepository,
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () {
+                  ItchIODataDialog.showItchIODataDialog(
+                    context,
+                    appId: 1,
+                  );
+                },
+                child: const Text('Show Dialog'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Show Dialog'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ItchIODataDialog), findsOneWidget);
+    });
+
+    testWidgets('updates text controllers when data is loaded', (tester) async {
+      const newData = ItchIOData(
+        id: 1,
+        appId: 1,
+        buttlerKey: 'new-key',
+        itchIOUsername: 'new-user',
+        itchIOGameName: 'new-game',
+      );
+
+      final states = [
+        const ItchIODataState(status: ItchIODataStatus.loading),
+        const ItchIODataState(
+          status: ItchIODataStatus.loaded,
+          data: newData,
+        ),
+      ];
+
+      whenListen(
+        itchIODataCubit,
+        Stream.fromIterable(states),
+        initialState: const ItchIODataState(),
+      );
+
+      await tester.pumpWidget(buildSubject());
+      await tester.pump();
+
+      final buttlerKeyField = find.widgetWithText(TextFormField, 'Buttler Key');
+      final usernameField =
+          find.widgetWithText(TextFormField, 'ItchIO Username');
+      final gameNameField = find.widgetWithText(TextFormField, 'Game Name');
+
+      expect(
+        (tester.widget(buttlerKeyField) as TextFormField).controller!.text,
+        equals('new-key'),
+      );
+      expect(
+        (tester.widget(usernameField) as TextFormField).controller!.text,
+        equals('new-user'),
+      );
+      expect(
+        (tester.widget(gameNameField) as TextFormField).controller!.text,
+        equals('new-game'),
+      );
+    });
   });
 }
