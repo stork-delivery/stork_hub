@@ -62,7 +62,7 @@ class ApiKeyRepository {
       final prefs = await SharedPreferences.getInstance();
       final content = prefs.getString(_storageKey);
       if (content == null) return null;
-      
+
       final data = jsonDecode(content) as Map<String, dynamic>;
 
       final derivedKey = _deriveKey(password);
