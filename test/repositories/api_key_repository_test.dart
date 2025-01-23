@@ -1,18 +1,13 @@
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stork_hub/repositories/api_key_repository.dart';
 
 void main() {
   late ApiKeyRepository repository;
-  late Directory tempDir;
 
   setUp(() async {
-    tempDir = await Directory.systemTemp.createTemp();
-    repository = ApiKeyRepository(directory: tempDir.path);
-  });
-
-  tearDown(() async {
-    await tempDir.delete(recursive: true);
+    SharedPreferences.setMockInitialValues({});
+    repository = ApiKeyRepository();
   });
 
   group('ApiKeyRepository', () {

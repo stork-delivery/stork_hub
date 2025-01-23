@@ -1,27 +1,21 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:encrypt/encrypt.dart';
 import 'package:pointycastle/digests/sha256.dart';
 import 'package:pointycastle/key_derivators/pbkdf2.dart';
 import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/pointycastle.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// A repository that handles API key storage and retrieval
 class ApiKeyRepository {
-  ApiKeyRepository({
-    required String directory,
-  }) : _directory = directory;
-
-  final String _directory;
+  ApiKeyRepository();
 
   static const _iterations = 1000;
   static const _keyLength = 32; // 256 bits
   static const _ivLength = 16; // 128 bits
   static const _salt = 'stork_hub_salt'; // Fixed salt for simplicity
-  static const _fileName = 'api_key.enc';
-
-  String get _storageFile => '$_directory/$_fileName';
+  static const _storageKey = 'encrypted_api_key';
 
   Uint8List _deriveKey(String password) {
     final params = Pbkdf2Parameters(
@@ -52,8 +46,8 @@ class ApiKeyRepository {
       'encrypted': encrypted.bytes,
     };
 
-    final file = File(_storageFile);
-    await file.writeAsString(jsonEncode(dataToStore));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_storageKey, jsonEncode(dataToStore));
   }
 
   /// Retrieves a previously saved API key using the provided password
@@ -65,8 +59,10 @@ class ApiKeyRepository {
     }
 
     try {
-      final file = File(_storageFile);
-      final content = await file.readAsString();
+      final prefs = await SharedPreferences.getInstance();
+      final content = prefs.getString(_storageKey);
+      if (content == null) return null;
+      
       final data = jsonDecode(content) as Map<String, dynamic>;
 
       final derivedKey = _deriveKey(password);
@@ -80,22 +76,20 @@ class ApiKeyRepository {
 
       return encrypter.decrypt(encrypted, iv: iv);
     } catch (e) {
-      // If decryption fails (wrong password) or file is corrupted
+      // If decryption fails (wrong password) or data is corrupted
       return null;
     }
   }
 
-  /// Checks if an API key file exists
+  /// Checks if an API key exists
   Future<bool> hasApiKey() async {
-    final file = File(_storageFile);
-    return file.existsSync();
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey(_storageKey);
   }
 
-  /// Deletes the saved API key file if it exists
+  /// Deletes the saved API key if it exists
   Future<void> deleteApiKey() async {
-    final file = File(_storageFile);
-    if (file.existsSync()) {
-      await file.delete();
-    }
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_storageKey);
   }
 }
