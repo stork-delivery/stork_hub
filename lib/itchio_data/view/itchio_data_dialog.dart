@@ -104,6 +104,9 @@ class _ItchIODataDialogState extends State<ItchIODataDialog> {
                       ],
                       TextFormField(
                         controller: _buttlerKeyController,
+                        obscureText: true,
+                        enableSuggestions: false,
+                        autocorrect: false,
                         decoration: const InputDecoration(
                           labelText: 'Buttler Key',
                         ),
