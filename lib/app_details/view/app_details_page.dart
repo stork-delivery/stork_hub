@@ -4,6 +4,7 @@ import 'package:stork_hub/app_details/app_details.dart';
 import 'package:stork_hub/artifacts/artifacts.dart';
 import 'package:stork_hub/itchio_data/itchio_data.dart';
 import 'package:stork_hub/l10n/l10n.dart';
+import 'package:stork_hub/news/news.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
 
 /// {@template app_details_page}
@@ -112,6 +113,16 @@ class AppDetailsView extends StatelessWidget {
                       },
                     ),
                   ],
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    NewsDialog.showNewsDialog(
+                      context,
+                      appId: state.app!.id,
+                    );
+                  },
+                  child: const Text('News'),
                 ),
                 const SizedBox(height: 32),
                 Row(
