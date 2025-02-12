@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stork_hub/models/models.dart';
+import 'package:stork_hub/news/news_form/cubit/news_form_state.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
-import 'news_form_state.dart';
 
 class NewsFormCubit extends Cubit<NewsFormState> {
   NewsFormCubit({
