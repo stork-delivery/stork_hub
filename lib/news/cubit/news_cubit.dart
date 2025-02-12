@@ -30,7 +30,7 @@ class NewsCubit extends Cubit<NewsState> {
       final news = await _storkRepository.listNews(
         appId: _appId,
         perPage: 10,
-        page: 1, // TODO paginate this
+        page: 1, // TODO(erick): paginate this
       );
       emit(
         state.copyWith(
