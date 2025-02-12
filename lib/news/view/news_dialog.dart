@@ -90,31 +90,57 @@ class NewsDialog extends StatelessWidget {
                     const Text('No news available')
                   else
                     Flexible(
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: state.news.length,
-                        separatorBuilder: (context, index) => const Divider(),
-                        itemBuilder: (context, index) {
-                          final news = state.news[index];
-                          return ListTile(
-                            title: Text(news.title),
-                            subtitle: Text('Created at: ${news.createdAt}'),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () async {
-                                final cubit = context.read<NewsCubit>();
-                                await NewsFormDialog.show(
-                                  context,
-                                  repository: storkRepository,
-                                  appId: context.read<NewsCubit>().appId,
-                                  news: news,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: ListView.separated(
+                              shrinkWrap: true,
+                              itemCount: state.news.length,
+                              separatorBuilder: (context, index) =>
+                                  const Divider(),
+                              itemBuilder: (context, index) {
+                                final news = state.news[index];
+                                return ListTile(
+                                  title: Text(news.title),
+                                  subtitle:
+                                      Text('Created at: ${news.createdAt}'),
+                                  trailing: IconButton(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () async {
+                                      final cubit = context.read<NewsCubit>();
+                                      await NewsFormDialog.show(
+                                        context,
+                                        repository: storkRepository,
+                                        appId: context.read<NewsCubit>().appId,
+                                        news: news,
+                                      );
+                                      await cubit.loadNews();
+                                    },
+                                    tooltip: 'Edit news',
+                                  ),
                                 );
-                                await cubit.loadNews();
                               },
-                              tooltip: 'Edit news',
                             ),
-                          );
-                        },
+                          ),
+                          if (state.hasMore) ...[
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: state.status == NewsStatus.loading
+                                  ? null
+                                  : () =>
+                                      context.read<NewsCubit>().loadMoreNews(),
+                              child: state.status == NewsStatus.loading
+                                  ? const SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Load More'),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                 ],

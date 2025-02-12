@@ -519,5 +519,247 @@ void main() {
         );
       });
     });
+
+    group('listNews', () {
+      test('returns list of news', () async {
+        final now = DateTime.now();
+        final storkNews = [
+          StorkAppNews(
+            id: 1,
+            title: 'News 1',
+            content: 'Content 1',
+            createdAt: now,
+          ),
+          StorkAppNews(
+            id: 2,
+            title: 'News 2',
+            content: 'Content 2',
+            createdAt: now,
+          ),
+        ];
+
+        when(
+          () => client.listNews(
+            appId: 1,
+            page: 1,
+            perPage: 10,
+          ),
+        ).thenAnswer((_) async => storkNews);
+
+        final news = await repository.listNews(
+          appId: 1,
+          page: 1,
+          perPage: 10,
+        );
+
+        expect(
+          news,
+          equals([
+            News(
+              id: 1,
+              title: 'News 1',
+              content: 'Content 1',
+              createdAt: now,
+            ),
+            News(
+              id: 2,
+              title: 'News 2',
+              content: 'Content 2',
+              createdAt: now,
+            ),
+          ]),
+        );
+
+        verify(
+          () => client.listNews(
+            appId: 1,
+            page: 1,
+            perPage: 10,
+          ),
+        ).called(1);
+      });
+
+      test('returns empty list when no news', () async {
+        when(
+          () => client.listNews(
+            appId: 1,
+            page: 1,
+            perPage: 10,
+          ),
+        ).thenAnswer((_) async => []);
+
+        final news = await repository.listNews(
+          appId: 1,
+          page: 1,
+          perPage: 10,
+        );
+
+        expect(news, isEmpty);
+        verify(
+          () => client.listNews(
+            appId: 1,
+            page: 1,
+            perPage: 10,
+          ),
+        ).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to list news');
+        when(
+          () => client.listNews(
+            appId: any(named: 'appId'),
+            page: any(named: 'page'),
+            perPage: any(named: 'perPage'),
+          ),
+        ).thenThrow(exception);
+
+        expect(
+          () => repository.listNews(
+            appId: 1,
+            page: 1,
+            perPage: 10,
+          ),
+          throwsA(equals(exception)),
+        );
+      });
+    });
+
+    group('createNews', () {
+      test('creates a news article', () async {
+        final now = DateTime.now();
+        final storkNews = StorkAppNews(
+          id: 1,
+          title: 'Test News',
+          content: 'Test Content',
+          createdAt: now,
+        );
+
+        when(
+          () => client.createNews(
+            appId: 1,
+            title: 'Test News',
+            content: 'Test Content',
+          ),
+        ).thenAnswer((_) async => storkNews);
+
+        final news = await repository.createNews(
+          appId: 1,
+          title: 'Test News',
+          content: 'Test Content',
+        );
+
+        expect(
+          news,
+          equals(
+            News(
+              id: 1,
+              title: 'Test News',
+              content: 'Test Content',
+              createdAt: now,
+            ),
+          ),
+        );
+
+        verify(
+          () => client.createNews(
+            appId: 1,
+            title: 'Test News',
+            content: 'Test Content',
+          ),
+        ).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to create news');
+        when(
+          () => client.createNews(
+            appId: any(named: 'appId'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+          ),
+        ).thenThrow(exception);
+
+        expect(
+          () => repository.createNews(
+            appId: 1,
+            title: 'Test News',
+            content: 'Test Content',
+          ),
+          throwsA(equals(exception)),
+        );
+      });
+    });
+
+    group('updateNews', () {
+      test('updates a news article', () async {
+        final now = DateTime.now();
+        final storkNews = StorkAppNews(
+          id: 1,
+          title: 'Updated News',
+          content: 'Updated Content',
+          createdAt: now,
+        );
+
+        when(
+          () => client.updateNews(
+            appId: 1,
+            newsId: 1,
+            title: 'Updated News',
+            content: 'Updated Content',
+          ),
+        ).thenAnswer((_) async => storkNews);
+
+        final news = await repository.updateNews(
+          appId: 1,
+          id: 1,
+          title: 'Updated News',
+          content: 'Updated Content',
+        );
+
+        expect(
+          news,
+          equals(
+            News(
+              id: 1,
+              title: 'Updated News',
+              content: 'Updated Content',
+              createdAt: now,
+            ),
+          ),
+        );
+
+        verify(
+          () => client.updateNews(
+            appId: 1,
+            newsId: 1,
+            title: 'Updated News',
+            content: 'Updated Content',
+          ),
+        ).called(1);
+      });
+
+      test('throws when client throws', () async {
+        final exception = Exception('Failed to update news');
+        when(
+          () => client.updateNews(
+            appId: any(named: 'appId'),
+            newsId: any(named: 'newsId'),
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+          ),
+        ).thenThrow(exception);
+
+        expect(
+          () => repository.updateNews(
+            appId: 1,
+            id: 1,
+            title: 'Updated News',
+            content: 'Updated Content',
+          ),
+          throwsA(equals(exception)),
+        );
+      });
+    });
   });
 }

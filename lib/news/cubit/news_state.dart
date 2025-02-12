@@ -25,6 +25,7 @@ class NewsState extends Equatable {
     this.news = const [],
     this.page = 1,
     this.error,
+    this.hasMore = true,
   });
 
   /// The status of the news loading
@@ -39,8 +40,11 @@ class NewsState extends Equatable {
   /// The error message if any
   final String? error;
 
+  /// Whether there are more news to load
+  final bool hasMore;
+
   @override
-  List<Object?> get props => [status, news, page, error];
+  List<Object?> get props => [status, news, page, error, hasMore];
 
   /// Creates a copy of this state with the given fields replaced with new
   /// values
@@ -49,12 +53,14 @@ class NewsState extends Equatable {
     List<News>? news,
     int? page,
     String? error,
+    bool? hasMore,
   }) {
     return NewsState(
       status: status ?? this.status,
       news: news ?? this.news,
       page: page ?? this.page,
       error: error ?? this.error,
+      hasMore: hasMore ?? this.hasMore,
     );
   }
 }
