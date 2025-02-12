@@ -131,7 +131,7 @@ packages:
     description:
       path: "."
       ref: main
-      resolved-ref: a194b785a5e0ae0343348232aa02c678c881c440
+      resolved-ref: "55161c3853f296df83ab28951b596028ec3fe253"
       url: "https://github.com/stork-delivery/dart_stork_admin_client.git"
     source: git
     version: "0.1.0+1"

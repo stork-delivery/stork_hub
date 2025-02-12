@@ -169,4 +169,67 @@ class StorkRepository {
       itchIOGameName: data.itchIOGameName,
     );
   }
+
+  /// Lists the news from an app
+  Future<List<News>> listNews({
+    required int appId,
+    required int page,
+    required int perPage,
+  }) async {
+    final news = await client.listNews(
+      appId: appId,
+      page: page,
+      perPage: perPage,
+    );
+    return news
+        .map(
+          (news) => News(
+            id: news.id,
+            title: news.title,
+            content: news.content,
+            createdAt: news.createdAt,
+          ),
+        )
+        .toList();
+  }
+
+  /// Creates a new news article.
+  Future<News> createNews({
+    required int appId,
+    required String title,
+    required String content,
+  }) async {
+    final news = await client.createNews(
+      appId: appId,
+      title: title,
+      content: content,
+    );
+    return News(
+      id: news.id,
+      title: news.title,
+      content: news.content,
+      createdAt: news.createdAt,
+    );
+  }
+
+  /// Updates an existing news article.
+  Future<News> updateNews({
+    required int appId,
+    required int id,
+    required String title,
+    required String content,
+  }) async {
+    final news = await client.updateNews(
+      appId: appId,
+      newsId: id,
+      title: title,
+      content: content,
+    );
+    return News(
+      id: news.id,
+      title: news.title,
+      content: news.content,
+      createdAt: news.createdAt,
+    );
+  }
 }
