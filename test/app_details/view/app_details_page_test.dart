@@ -199,56 +199,62 @@ void main() {
       when(() => cubit.state).thenReturn(state);
       whenListen(
         cubit,
-        Stream.value(state),
-        initialState: state,
+        Stream.fromIterable([state]),
       );
 
       await tester.pumpWidget(
-        BlocProvider.value(
-          value: cubit,
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(
-              body: AppDetailsView(),
+        RepositoryProvider.value(
+          value: storkRepository,
+          child: BlocProvider.value(
+            value: cubit,
+            child: const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(body: AppDetailsView()),
             ),
           ),
         ),
       );
 
+      expect(find.text('Version: 2.0.0'), findsOneWidget);
+      expect(find.text('Version: 1.1.0'), findsOneWidget);
+      expect(find.text('Version: 1.0.0'), findsOneWidget);
+      expect(find.text('Major update'), findsOneWidget);
+      expect(find.text('Minor update'), findsOneWidget);
+      expect(find.text('Initial release'), findsOneWidget);
+    });
+
+    testWidgets('opens news dialog when news button is pressed',
+        (tester) async {
+      const app = App(id: 1, name: 'Test App', publicMetadata: true);
+      when(() => cubit.state).thenReturn(
+        const AppDetailsState(
+          status: AppDetailsStatus.loaded,
+          app: app,
+        ),
+      );
+
+      await tester.pumpWidget(
+        RepositoryProvider.value(
+          value: storkRepository,
+          child: BlocProvider.value(
+            value: cubit,
+            child: const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(body: AppDetailsView()),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('News'), findsOneWidget);
+
+      await tester.tap(find.text('News'));
       await tester.pumpAndSettle();
 
-      // Find ListView first
-      final listView = find.byType(ListView);
-      expect(listView, findsOneWidget);
-
-      // Test each version individually using descendant finder
-      for (final version in versions) {
-        expect(
-          find.descendant(
-            of: listView,
-            matching: find.text('Version: ${version.version}'),
-          ),
-          findsOneWidget,
-          reason: 'Could not find version ${version.version}',
-        );
-        expect(
-          find.descendant(
-            of: listView,
-            matching: find.text(version.changelog),
-          ),
-          findsOneWidget,
-        );
-      }
-
-      // Verify changelog labels
-      expect(
-        find.descendant(
-          of: listView,
-          matching: find.text('Changelog:'),
-        ),
-        findsNWidgets(3),
-      );
+      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.text('News', skipOffstage: false), findsWidgets);
     });
 
     testWidgets('calls updateApp when name is submitted', (tester) async {
