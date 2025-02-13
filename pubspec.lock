@@ -411,6 +411,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mockingjay:
+    dependency: "direct dev"
+    description:
+      name: mockingjay
+      sha256: cea2f3d38d1343beb6908f0ade5724c12304ee74014fbd274b4065a4b7db6536
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.0"
   mocktail:
     dependency: "direct dev"
     description:

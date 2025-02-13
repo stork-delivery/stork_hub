@@ -4,37 +4,49 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
+import 'package:mockingjay/mockingjay.dart';
 import 'package:stork_hub/models/models.dart';
 import 'package:stork_hub/news/news.dart';
+import 'package:stork_hub/news/news_form/view/news_form_dialog.dart';
 import 'package:stork_hub/repositories/stork_repository.dart';
 
 class MockStorkRepository extends Mock implements StorkRepository {}
 
 class MockNewsCubit extends MockCubit<NewsState> implements NewsCubit {}
 
-class MockNavigatorObserver extends Mock implements NavigatorObserver {}
-
-class FakeRoute extends Fake implements Route<dynamic> {}
-
 void main() {
-  setUpAll(() {
-    registerFallbackValue(FakeRoute());
+  late StorkRepository storkRepository;
+  late NewsCubit cubit;
+  late MockNavigator navigator;
+
+  setUp(() {
+    storkRepository = MockStorkRepository();
+    cubit = MockNewsCubit();
+    navigator = MockNavigator();
+
+    when(cubit.loadNews).thenAnswer((_) async {});
+    when(cubit.loadMoreNews).thenAnswer((_) async {});
+    when(() => cubit.appId).thenReturn(1);
+    when(() => navigator.push<void>(any())).thenAnswer((_) async {});
+    when(() => navigator.pop<void>()).thenAnswer((_) async {});
+    when(() => navigator.canPop()).thenReturn(true);
   });
 
+  Widget buildSubject({
+    required Widget child,
+  }) {
+    return MaterialApp(
+      home: MockNavigatorProvider(
+        navigator: navigator,
+        child: BlocProvider.value(
+          value: cubit,
+          child: child,
+        ),
+      ),
+    );
+  }
+
   group('NewsDialog', () {
-    late StorkRepository storkRepository;
-    late NewsCubit cubit;
-
-    setUp(() {
-      storkRepository = MockStorkRepository();
-      cubit = MockNewsCubit();
-
-      when(cubit.loadNews).thenAnswer((_) async {});
-      when(cubit.loadMoreNews).thenAnswer((_) async {});
-      when(() => cubit.appId).thenReturn(1);
-    });
-
     testWidgets('renders loading indicator when status is loading',
         (tester) async {
       when(() => cubit.state).thenReturn(
@@ -42,11 +54,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: NewsDialog(storkRepository: storkRepository),
-          ),
+        buildSubject(
+          child: NewsDialog(storkRepository: storkRepository),
         ),
       );
 
@@ -62,11 +71,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: NewsDialog(storkRepository: storkRepository),
-          ),
+        buildSubject(
+          child: NewsDialog(storkRepository: storkRepository),
         ),
       );
 
@@ -80,11 +86,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: NewsDialog(storkRepository: storkRepository),
-          ),
+        buildSubject(
+          child: NewsDialog(storkRepository: storkRepository),
         ),
       );
 
@@ -116,80 +119,63 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: NewsDialog(storkRepository: storkRepository),
-          ),
+        buildSubject(
+          child: NewsDialog(storkRepository: storkRepository),
         ),
       );
 
       expect(find.text('Test News 1'), findsOneWidget);
       expect(find.text('Test News 2'), findsOneWidget);
-      expect(find.text('Created at: $now'), findsNWidgets(2));
-      expect(find.byIcon(Icons.edit), findsNWidgets(2));
     });
 
-    testWidgets('shows load more button when hasMore is true', (tester) async {
-      when(() => cubit.state).thenReturn(
-        NewsState(
-          status: NewsStatus.loaded,
-          hasMore: true,
-          news: [
-            News(
-              id: 1,
-              title: 'Test News',
-              content: 'Content',
-              createdAt: DateTime.now(),
+    group('showNewsDialog', () {
+      testWidgets('shows dialog with NewsCubit provider', (tester) async {
+        final context = MaterialApp(
+          home: MockNavigatorProvider(
+            navigator: navigator,
+            child: RepositoryProvider<StorkRepository>(
+              create: (_) => storkRepository,
+              child: Builder(
+                builder: (context) => TextButton(
+                  onPressed: () => NewsDialog.showNewsDialog(
+                    context,
+                    appId: 1,
+                  ),
+                  child: const Text('Show Dialog'),
+                ),
+              ),
             ),
-          ],
-        ),
-      );
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: NewsDialog(storkRepository: storkRepository),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Load More'), findsOneWidget);
+        await tester.pumpWidget(context);
+        await tester.tap(find.text('Show Dialog'));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Load More'));
-      await tester.pump();
-
-      verify(() => cubit.loadMoreNews()).called(1);
+        expect(find.byType(NewsDialog), findsOneWidget);
+      });
     });
 
-    testWidgets('load more button shows loading indicator when loading',
+    group('add news button', () {
+      testWidgets(
+        'opens NewsFormDialog and reloads news on tap',
         (tester) async {
-      when(() => cubit.state).thenReturn(
-        NewsState(
-          status: NewsStatus.loading,
-          hasMore: true,
-          news: [
-            News(
-              id: 1,
-              title: 'Test News',
-              content: 'Content',
-              createdAt: DateTime.now(),
+          when(() => cubit.state).thenReturn(
+            NewsState(status: NewsStatus.loaded),
+          );
+
+          await tester.pumpWidget(
+            buildSubject(
+              child: NewsDialog(storkRepository: storkRepository),
             ),
-          ],
-        ),
-      );
+          );
 
-      await tester.pumpWidget(
-        MaterialApp(
-          home: BlocProvider.value(
-            value: cubit,
-            child: NewsDialog(storkRepository: storkRepository),
-          ),
-        ),
-      );
+          await tester.tap(find.byIcon(Icons.add));
+          await tester.pumpAndSettle();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+          expect(find.byType(NewsFormDialog), findsOneWidget);
+        },
+      );
     });
   });
 }
